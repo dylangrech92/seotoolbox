@@ -2,8 +2,8 @@
 
 class SEOTestSiteTreeController extends Controller{
 
-	private static $sprite_path = null;
-	private static $css         = null;
+    private static $sprite_path = null;
+    private static $css         = null;
 
     private static $desktop_user_agent  = 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36';
     private static $mobile_user_agent   = 'Mozilla/5.0 (Linux; <Android Version>; <Build Tag etc.>) AppleWebKit/<WebKit Rev> (KHTML, like Gecko) Chrome/<Chrome Rev> Mobile Safari/<WebKit Rev>';
@@ -11,9 +11,9 @@ class SEOTestSiteTreeController extends Controller{
     // Array of regex that will be used by the crawler. If the url we're going to crawl matches any filter in here, it will be ignored
     private static $ignore_paths = array();
 
-	private static $allowed_actions = array( 'urlsAndSettings', 'getPageData' );
-	
-	public function init(){
+    private static $allowed_actions = array( 'urlsAndSettings', 'getPageData' );
+
+    public function init(){
         parent::init();
 
         // Check user is logged in and has permission to access to SEO Toolbox Admin
@@ -23,13 +23,14 @@ class SEOTestSiteTreeController extends Controller{
         Requirements::clear();
 
         // Sprite Location needs to be dynamic as devs can install module in different locations
-        if (self::$sprite_path === null) self::$sprite_path = SEOTOOLBOX_DIR . '/css/icons/icon_sprite.png';
-        $sprite_path = self::$sprite_path;
+        $sprite_path = $this->config()->get('sprite_path');
+        if ($sprite_path === null) $sprite_path = SEOTOOLBOX_DIR . '/css/icons/icon_sprite.png';
         Requirements::customCSS(".icon{width:16px;height: 16px;cursor:pointer;background: url({$sprite_path});}");
 
         // CSS can be replaced by devs if they desire to change styling
-        if (self::$css === null) self::$css = array(SEOTOOLBOX_DIR . '/fonts/lato/lato.css', SEOTOOLBOX_DIR . '/css/seotest.css');
-        Requirements::combine_files('seotest.css', self::$css);
+        $css = $this->config()->get('css');
+        if ($css === null) $css = array(SEOTOOLBOX_DIR . '/fonts/lato/lato.css', SEOTOOLBOX_DIR . '/css/seotest.css');
+        Requirements::combine_files('seotest.css', $css);
 
         Requirements::combine_files('seotest.js', array(
             SEOTOOLBOX_DIR . '/js/jquery-1.12.0.js',
@@ -55,9 +56,11 @@ class SEOTestSiteTreeController extends Controller{
      * @return String
      */
     public function getPageData(SS_HTTPRequest $request){
-        $agent  = ( $request->getVar('agent') == 'mobile' ) ? self::$mobile_user_agent : self::$desktop_user_agent;
-        $curl   = $this->loadPage($request->getVar('u'), $agent);
+        $agent  = ( $request->getVar('agent') == 'mobile' )
+            ? $this->config()->get('mobile_user_agent')
+            : $this->config()->get('desktop_user_agent');
 
+        $curl   = $this->loadPage($request->getVar('u'), $agent);
         $curl['phrases'] = $this->extractWords($curl['body']);
 
         Requirements::clear();
@@ -122,10 +125,10 @@ class SEOTestSiteTreeController extends Controller{
         return $phrases;
     }
 
-	public function urlsAndSettings( SS_HTTPRequest $request ){
-	    Requirements::clear();
-		return json_encode(array(
-		    'urls' => SiteTree::get()
+    public function urlsAndSettings( SS_HTTPRequest $request ){
+        Requirements::clear();
+        return json_encode(array(
+            'urls' => SiteTree::get()
                 ->exclude( 'ClassName', 'RedirectorPage' )
                 ->exclude( 'ClassName', 'ErrorPage' )
                 ->map( 'ID', 'AbsoluteLink' )
@@ -136,9 +139,9 @@ class SEOTestSiteTreeController extends Controller{
                 'crawl_id'     => GlobalAutoLinkSettings::get_current()->CrawlID
             )
         ));
-	}
+    }
 
-	private function getHTMLFieldsData($data){
+    private function getHTMLFieldsData($data){
         preg_match_all('/\[\*\*\[(.*?)\]\*\*\[(.*?)\]\*\*\]/im', $data, $matches);
         foreach( $matches[2] as $key => $field_text ){
             $matches[2][$key] = base64_decode($field_text);
@@ -147,8 +150,8 @@ class SEOTestSiteTreeController extends Controller{
         return $matches;
     }
 
-	public function loadPage($url, $agent=null){
-	    $crawl_id = GlobalAutoLinkSettings::get_current()->CrawlID;
+    public function loadPage($url, $agent=null){
+        $crawl_id = GlobalAutoLinkSettings::get_current()->CrawlID;
         $ch = curl_init();
         curl_setopt( $ch, CURLOPT_URL, Director::absoluteBaseURL().'/'.$url );
         curl_setopt( $ch, CURLOPT_HEADER, true );
@@ -177,23 +180,23 @@ class SEOTestSiteTreeController extends Controller{
 
         return array( 'headers' => $header, 'body' => $body, 'field_data' => $field_data );
     }
-	
-	/**
-	 * If ErrorPage exists for Error Code 503 return it
-	 * else create it and return it
-	 * 
-	 * @return ErrorPage
-	 */
-	public static function getPermissionDeniedPage(){
-		$page = ErrorPage::get()->find( 'ErrorCode', 503 );
-		if( !$page ){
-				$page = ErrorPage::create( array( 
-				'ErrorCode' => 503,
-				'Title'		=> 'Permission Denied'
-			) );
-			$page->write();
-		}
-		
-		return $page;
-	}
+
+    /**
+     * If ErrorPage exists for Error Code 503 return it
+     * else create it and return it
+     *
+     * @return ErrorPage
+     */
+    public static function getPermissionDeniedPage(){
+        $page = ErrorPage::get()->find( 'ErrorCode', 503 );
+        if( !$page ){
+            $page = ErrorPage::create( array(
+                'ErrorCode' => 503,
+                'Title'		=> 'Permission Denied'
+            ) );
+            $page->write();
+        }
+
+        return $page;
+    }
 }
