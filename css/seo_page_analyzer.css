@@ -1,0 +1,38 @@
+#search_snippet{
+    font-family: arial,sans-serif;
+    width: 528px;
+    background-color: #fff;
+    padding: 4px 16px;
+    margin-bottom: 16px;
+}
+
+#search_snippet h3{
+    font-style: normal;
+    font-weight: bold;
+    color: #1122CC;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: medium;
+    font-family: arial,sans-serif;
+    text-decoration: underline;
+    margin-bottom: 4px;
+    overflow: hidden;
+}
+
+#search_snippet .search_url{
+    font-size: 14px !important;
+    display: inline-block;
+    color: #009933;
+    font-style: normal;
+    white-space: nowrap;
+    font-family: arial,sans-serif;
+    font-size: small;
+    font-weight: normal;
+}
+
+.result_cont .field{border:none;box-shadow:none;-moz-box-shadow:none;-o-box-shadow:none;-webkit-box-shadow:none}
+.result_cont .keyword_search{padding: 5px 0 20px 0;}
+.result_cont .keyword_search .text{margin-right:10px}
+.result_cont .keyword_search button .ui-button-text{padding: 0.6em 2em}
+.result_cont span.green{background:#359318;color:#FFF;padding:5px;margin-left:10px}
+.result_cont span.red{background:#E30100;color:#FFF;padding:5px;margin-left:10px}

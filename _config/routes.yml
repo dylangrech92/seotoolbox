@@ -1,0 +1,8 @@
+---
+Name: seotoolboxroutes
+After: framework/routes#coreroutes
+---
+Director:
+  rules:
+    'seotest'                 : 'SEOTestSiteTreeController'
+    'AutomatedLinkReportTask' : 'AutomatedLinkReportTask'

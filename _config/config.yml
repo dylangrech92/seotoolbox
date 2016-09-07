@@ -1,0 +1,11 @@
+---
+Name: seotoolbox_config
+---
+
+ContentController:
+  extensions:
+    - SEOToolboxControllerExtension
+
+SiteTree:
+  extensions:
+    - SEOToolboxSiteTreeExtension
