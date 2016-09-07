@@ -12,7 +12,7 @@ class SEOToolboxAnalyzerField extends LiteralField{
         $mobile_toggle = ($mobile) ? 'true' : 'false';
         $div    = "<div id='seotoolbox_con_{$name}'><h3>{$title}</h3><div class='result_cont'></div></div>";
         $script = "<script type='text/javascript'>
-                    (function(\$){new PageAnalyzer(\$('#seotoolbox_con_{$name} .result_cont'), '{$url}', {$mobile_toggle})};;(jQuery))
+                    (function(\$){new PageAnalyzer(\$('#seotoolbox_con_{$name} .result_cont'),'{$url}',{$mobile_toggle})}(jQuery))
                    </script>";
         return $div.$script;
     }
