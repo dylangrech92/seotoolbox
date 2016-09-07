@@ -2,17 +2,15 @@
 
 class SEOToolboxAnalyzerField extends LiteralField{
 
-    public function __construct($name, $isMobile, $url){
-        $content = $this->createBaseHTML($name, $isMobile, $url);
+    public function __construct($name, $url){
+        $content = $this->createBaseHTML($name, $url);
         parent::__construct($name, $content);
     }
 
-    private function createBaseHTML($name, $mobile, $url){
-        $title  = ($mobile) ? 'Mobile' : 'Desktop';
-        $mobile_toggle = ($mobile) ? 'true' : 'false';
-        $div    = "<div id='seotoolbox_con_{$name}'><h3>{$title}</h3><div class='result_cont'></div></div>";
+    private function createBaseHTML($name, $url){
+        $div    = "<div id='seotoolbox_con_{$name}'><div class='clearfix result_cont'></div></div>";
         $script = "<script type='text/javascript'>
-                    (function(\$){new PageAnalyzer(\$('#seotoolbox_con_{$name} .result_cont'),'{$url}',{$mobile_toggle})}(jQuery))
+                    (function(\$){new PageAnalyzer(\$('#seotoolbox_con_{$name} .result_cont'),'{$url}')}(jQuery))
                    </script>";
         return $div.$script;
     }

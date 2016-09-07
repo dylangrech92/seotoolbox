@@ -15,17 +15,7 @@ class SEOToolboxSiteTreeExtension extends DataExtension{
 
     // #TODO: Combine Desktop and mobile into a single tab so that the keyword box only needs to be filled in once
     public function updateCMSFields(FieldList $fields){
-        $fields->addFieldToTab(
-            'Root.SEO.Analyzer.Desktop',
-            SEOToolboxAnalyzerField::create('DekstopAnalyzer', false, $this->owner->URLSegment )
-        );
-
-        $fields->addFieldToTab(
-            'Root.SEO.Analyzer.Mobile',
-            SEOToolboxAnalyzerField::create('MobileAnalyzer', true, $this->owner->URLSegment)
-        );
-
-        $fields->addFieldsToTab('Root.SEO.MetaData', array(
+        $fields->addFieldsToTab('Root.SEO', array(
             TextField::create("MetaTitle",
                 _t('SEOToolbox.SEOMetaTitle', 'Meta title')
             )->setRightTitle(
@@ -44,7 +34,8 @@ class SEOToolboxSiteTreeExtension extends DataExtension{
                     _t('SEOToolbox.METAEXTRAHELP',
                         "HTML tags for additional meta information. For example &lt;meta name=\"customName\" 
                         content=\"your custom content here\" /&gt;")
-                )->addExtraClass('help')
+                )->addExtraClass('help'),
+            SEOToolboxAnalyzerField::create('Analyzer', $this->owner->URLSegment ),
         ));
     }
 

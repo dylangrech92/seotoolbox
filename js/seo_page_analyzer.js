@@ -1,33 +1,9 @@
-function PageAnalyzer(cont, url, mobile){
+function PageAnalyzer(cont, url){
     $ = jQuery;
 
-    this.cont = cont;
-    this.url = url;
-    this.mobile = mobile;
-
-    this.init_report = function(){
-        this.cont.html('');
-
-        var self    = this,
-            url     = location.protocol + '//' + location.hostname + '/seotest/getPageData';
-
-        $.ajax({
-            dataType: 'json',
-            data:{'u': self.url, 'agent': (self.mobile) ? 'mobile' : 'desktop'},
-            url: url,
-            success: function(data){
-                self.generate_report(data);
-            }
-        });
-    };
-
-    this.generate_report = function(data){
-        this.create_google_preview();
-        this.create_divider();
-        this.create_keyword_analyzer(data);
-        this.create_divider();
-        this.create_other_tests_box(data);
-    };
+    this.cont   = cont;
+    this.url    = url;
+    this.data   = {'desktop': undefined, 'mobile': undefined};
 
     this.create_google_preview = function(){
         var page_url_basehref = $('input[name="URLSegment"]').attr('data-prefix'),
@@ -47,37 +23,6 @@ function PageAnalyzer(cont, url, mobile){
         this.cont.append($('<div id="search_snippet"></div>').html(search_result_html));
     };
 
-    this.create_keyword_analyzer = function(data){
-        var self = this,
-            keyword_box = $('<div class="field text"><h3>Keyword Analyzer</h3></div>'),
-            middle_col = $('<div class="keyword_search"></div>').appendTo(keyword_box),
-            text_box = $('<input type="text" class="text" />').appendTo(middle_col),
-            analyze_btn = $('<button class="ss-ui-button ss-ui-button-medium">Analyze</button>').appendTo(middle_col);
-
-        $('<div class="keyword_results"></div>').appendTo(keyword_box);
-
-        analyze_btn.click(function(){
-            var results_box = $(this).parents('.field.text').find('.keyword_results'),
-                keyword = text_box.val(),
-                html = $(data['body']),
-                in_h1 = html.find("h1:containsi('"+keyword+"')").length > 0,
-                first_p_with_keyword = html.find("p:containsi('"+keyword+"')").first(),
-                first_p_tag = html.find('p').first(),
-                in_first_paragraph = first_p_tag.html() == first_p_with_keyword.html(),
-                word_count = self.get_word_count(data['phrases']),
-                density = self.calculate_keyword_density(data['phrases'], keyword, word_count);
-
-            results_box
-                .html('')
-                .append(self.add_result_label('Keyword in h1', in_h1, 'Yes', 'No'))
-                .append(self.add_result_label('Keyword in first p tag', in_first_paragraph, 'Yes', 'No'))
-                .append(self.add_result_label('Word Count', true, word_count, ''))
-                .append(self.add_result_label('Keyword Density', true, density+'%', ''))
-        });
-
-        this.cont.append(keyword_box);
-    };
-
     this.add_result_label = function(title, test, text_true, text_false){
         var span = '<span class="'+(test ? 'green' : 'red')+'">'+(test ? text_true : text_false)+'</span>';
         return '<div><p><strong>'+title+'</strong>'+span+'</p>';
@@ -95,19 +40,19 @@ function PageAnalyzer(cont, url, mobile){
         return count;
     };
 
-    this.create_other_tests_box = function(data){
+    this.create_other_tests_box = function(data, cont){
         var html = $(data['body']),
             h1_count = html.find('h1').length,
             h2_count = html.find('h2').length,
             word_count = this.get_word_count(data['field_data']['3']),
             missing_alt_count = this.get_missing_alt_count(html),
-            tests_box = $('<div class="field text"><h3>SEO Tests</h3></div>')
+            tests_box = $('<div class="field text"></div>')
                 .append(this.add_result_label('H1 count', h1_count == 1, '1', h1_count))
                 .append(this.add_result_label('H2 count', h2_count == 1, '1', h2_count))
                 .append(this.add_result_label('Article Word Count', word_count >= 700, word_count, word_count))
                 .append(this.add_result_label('Images missing alt tag', missing_alt_count <= 0, 0, missing_alt_count));
 
-        this.cont.append(tests_box);
+        cont.append(tests_box);
     };
 
     this.get_missing_alt_count = function(html){
@@ -116,11 +61,82 @@ function PageAnalyzer(cont, url, mobile){
         return count;
     };
 
-    this.create_divider = function(){
-        this.cont.append('<hr />');
+    this.create_layout = function(title){
+        return $('<div class="result_side_cont '+title.toLowerCase()+'"></div>')
+            .append($('<h3>'+title+'</h3>'))
+            .append($('<div class="field text"></div>'));
     };
 
-    this.init_report();
+    this.create_keyword_search_box = function(){
+        var self        = this,
+            agents      = ['desktop', 'mobile'],
+            keyword_box = $('<div class="field text"></div>'),
+            middle_col  = $('<div class="keyword_search"></div>').appendTo(keyword_box),
+            text_box    = $('<input type="text" class="text" />').appendTo(middle_col),
+            analyze_btn = $('<button class="ss-ui-button ss-ui-button-medium">Analyze</button>').appendTo(middle_col);
+
+        analyze_btn.click(function(){
+            if( self.data['desktop'] === undefined || self.data['mobile'] === undefined ) return true;
+
+            $('.keyword_result').remove();
+
+            for(var i in agents){
+                var data = self.data[agents[i]],
+                    layout  = self.create_layout(agents[i].capitalize()).addClass('keyword_result'),
+                    results_box = layout.find('.field.text'),
+                    keyword = text_box.val(),
+                    html = $(data['body']),
+                    in_h1 = html.find("h1:containsi('"+keyword+"')").length > 0,
+                    first_p_with_keyword = html.find("p:containsi('"+keyword+"')").first(),
+                    first_p_tag = html.find('p').first(),
+                    in_first_paragraph = first_p_tag.html() == first_p_with_keyword.html(),
+                    word_count = self.get_word_count(data['phrases']),
+                    density = self.calculate_keyword_density(data['phrases'], keyword, word_count);
+
+                results_box
+                    .append(self.add_result_label('Keyword in h1', in_h1, 'Yes', 'No'))
+                    .append(self.add_result_label('Keyword in first p tag', in_first_paragraph, 'Yes', 'No'))
+                    .append(self.add_result_label('Word Count', true, word_count, ''))
+                    .append(self.add_result_label('Keyword Density', true, density+'%', ''))
+
+                self.cont.append(layout);
+            }
+        });
+
+        return keyword_box;
+    };
+
+    this.init = function(){
+        // Google Preview Section
+        this.cont.append('<h2>Google Preview</h2>');
+
+        // Tests Section
+        this.cont.append('<h2>SEO Tests</h2>');
+        var tests_d = this.create_layout('Desktop').appendTo(this.cont),
+            tests_m = this.create_layout('Mobile').appendTo(this.cont);
+
+        // Keywords Section
+        this.cont.append('<h2>Keywords Analyzer</h2>');
+        this.cont.append(this.create_keyword_search_box());
+
+        this.send_ajax('mobile', tests_m.find('.field.text'));
+        this.send_ajax('desktop', tests_d.find('.field.text'));
+    };
+
+    this.send_ajax = function(agent, cont){
+        var self = this;
+        $.ajax({
+            dataType: 'json',
+            data: {'u': self.url, 'agent': agent},
+            url: location.protocol + '//' + location.hostname + '/seotest/getPageData',
+            success: function (data) {
+                self.data[agent] = data;
+                self.create_other_tests_box(data, cont);
+            }
+        });
+    }
+
+    this.init();
 }
 
 // Add a case insensitive version of the contains function
@@ -129,3 +145,7 @@ jQuery.extend(jQuery.expr[':'], {
         return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
     }
 });
+
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
