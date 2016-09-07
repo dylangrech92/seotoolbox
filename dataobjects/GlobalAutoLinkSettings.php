@@ -2,7 +2,7 @@
 /**
  * Plugin: SEOToolbox
  * Author: Dylan Grech
- * Copyright: 2015 
+ * Copyright: 2016
  * License: Open GPL License V3.0
  * 
  * Global Auto Link Settings is a dataobject that is auto-created

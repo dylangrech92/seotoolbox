@@ -2,15 +2,15 @@
 /**
  * Plugin: SEOToolbox
  * Author: Dylan Grech
- * Copyright: 2015 
+ * Copyright: 2015
  * License: Open GPL License V3.0
- * 
+ *
  * Add the SEO Toolbox Controller Extension to the Content Controller
  * so it can create the automated links to all the pages
- * 
+ *
  * Dependencies:
  * - SortableGridField https://github.com/UndefinedOffset/SortableGridField
- * 
+ *
  * Optional Dependencies:
  * - HTML5 - https://github.com/silverstripe/silverstripe-html5
  *
@@ -28,7 +28,7 @@
  * To run the crawler which check your whole site for SEO issues similar
  * to what Screaming Frog does but in a more simple fashion simply access:
  * <youdomain.tls>/seotest
- * 
+ *
  * Note: You need to be logged in and have access to the SEOToolbox Admin panel
  * to view this report.
  */

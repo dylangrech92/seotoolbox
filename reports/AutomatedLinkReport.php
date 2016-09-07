@@ -2,7 +2,7 @@
 /**
  * Plugin: SEOToolbox
  * Author: Dylan Grech
- * Copyright: 2015 
+ * Copyright: 2016
  * License: Open GPL License V3.0
  * 
  * Automated Link Report is a report that lists all automated
