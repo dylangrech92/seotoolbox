@@ -8,12 +8,18 @@ different areas:<br />
 
 ---
 
-## Dependencies
+### Installation
+```
+composer require dylangrech92/seotoolbox
+framework/sake dev/build
+```
+
+### Dependencies
 - [SortableGridField](https://github.com/UndefinedOffset/SortableGridField)
 - [Silverstripe-html5](https://github.com/silverstripe/silverstripe-html5) (Optional but recommended)
 
 
-## Compatability
+### Compatability
 [Silverstripe 3.0+](https://www.silverstripe.org/download/)
 
 ---

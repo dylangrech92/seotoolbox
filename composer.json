@@ -1,0 +1,32 @@
+{
+  "name": "dylangrech92/seotoolbox",
+  "description": "This plugin was created to facilitate SEO work by automating most of the manual labor",
+  "type": "silverstripe-module",
+  "homepage": "https://github.com/dylangrech92/seotoolbox",
+  "keywords": ["silverstripe", "seo", "toolbox", "automated links", "seo", "reporting", "seo testing"],
+  "license": "GPL V3",
+  "authors": [
+    {"name": "Dylan Grech","email": "dylangrech92@gmail.com"}
+  ],
+  "support": {
+    "issues": "https://github.com/dylangrech92/seotoolbox/issues"
+  },
+  "require": {
+    "php": ">=5.3.0",
+    "silverstripe/cms": ">= 3.0",
+    "silverstripe/framework": ">= 3.0",
+    "UndefinedOffset/SortableGridField": ">= 0.6.0",
+    "silverstripe/silverstripe-html5": ">= 1.0.1"
+  },
+  "extra": {
+    "installer-name": "seotoolbox",
+    "screenshots": [
+      "https://raw.githubusercontent.com/dylangrech92/seotoolbox/master/images/seotoolbox_add_link.png",
+      "https://raw.githubusercontent.com/dylangrech92/seotoolbox/master/images/seotoolbox_global_settings.png",
+      "https://raw.githubusercontent.com/dylangrech92/seotoolbox/master/images/seotoolbox_crawler_options.png",
+      "https://raw.githubusercontent.com/dylangrech92/seotoolbox/master/images/seotoolbox_crawl_1.png",
+      "https://raw.githubusercontent.com/dylangrech92/seotoolbox/master/images/seotoolbox_crawl_2.png",
+      "https://raw.githubusercontent.com/dylangrech92/seotoolbox/master/images/seotoolbox_onpage_analysis.png"
+    ]
+  }
+}
