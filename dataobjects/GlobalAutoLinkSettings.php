@@ -47,6 +47,11 @@ class GlobalAutoLinkSettings extends DataObject{
             $obj->CrawlID = $this->createCrawlID();
             $obj->write();
             DB::alteration_message("Added default records to $className table","created");
+        }else{
+            if(!$hasData->CrawlID){
+                $hasData->CrawlID = $this->createCrawlID();
+                $hasData->write();
+            }
         }
 
         parent::requireDefaultRecords();

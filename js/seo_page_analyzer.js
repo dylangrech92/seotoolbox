@@ -1,26 +1,32 @@
 function PageAnalyzer(cont, url){
     $ = jQuery;
 
-    this.cont   = cont;
-    this.url    = url;
-    this.data   = {'desktop': undefined, 'mobile': undefined};
+    this.cont       = cont;
+    this.url        = url;
+    this.data       = {'desktop': undefined, 'mobile': undefined};
+    this.preview    = {'desktop': undefined, 'mobile': undefined};
 
-    this.create_google_preview = function(){
-        var page_url_basehref = $('input[name="URLSegment"]').attr('data-prefix'),
-            page_url_segment = ( this.url == 'home' ) ? 'home' : '',
-            page_title = $('#Form_EditForm_Title').val(),
-            page_meta_title = $('#Form_EditForm_MetaTitle').val(),
-            page_description = $('#Form_EditForm_MetaDescription').val();
+    this.create_google_preview = function(agent){
+        this.preview[agent] = $('<div class="search_snippet"></div>')
+            .append('<h3></h3><div class="search_url"></div><p></p>');
+        return this.preview[agent];
+    };
 
-        // build google search preview
-        var google_search_url = page_url_basehref + page_url_segment;
-        var google_search_description = page_description;
+    this.meta_data_handler = function(){
+        var self = this;
 
-        var search_result_html = '<h3>' + ( page_meta_title ? page_meta_title : page_title )  + '</h3>';
-        search_result_html += '<div class="search_url">' + google_search_url + '</div>';
-        search_result_html += '<p>' + google_search_description + '</p>';
+        $('#Form_EditForm_Title, #Form_EditForm_MetaTitle, #Form_EditForm_MetaDescription, input[name="URLSegment"]').change(function(){
+            var title   = $('#Form_EditForm_MetaTitle').val() || $('#Form_EditForm_Title').val(),
+                url     = $('input[name="URLSegment"]').attr('data-prefix') + self.url;
 
-        this.cont.append($('<div id="search_snippet"></div>').html(search_result_html));
+            for(var agent in self.preview){
+                self.preview[agent].find('h3').html(title);
+                self.preview[agent].find('.search_url').html(url);
+                self.preview[agent].find('p').html($('#Form_EditForm_MetaDescription').val());
+            }
+        });
+
+        $('#Form_EditForm_Title').trigger('change');
     };
 
     this.add_result_label = function(title, test, text_true, text_false){
@@ -45,14 +51,14 @@ function PageAnalyzer(cont, url){
             h1_count = html.find('h1').length,
             h2_count = html.find('h2').length,
             word_count = this.get_word_count(data['field_data']['3']),
-            missing_alt_count = this.get_missing_alt_count(html),
-            tests_box = $('<div class="field text"></div>')
+            missing_alt_count = this.get_missing_alt_count(html);
+
+            cont
                 .append(this.add_result_label('H1 count', h1_count == 1, '1', h1_count))
                 .append(this.add_result_label('H2 count', h2_count == 1, '1', h2_count))
                 .append(this.add_result_label('Article Word Count', word_count >= 700, word_count, word_count))
                 .append(this.add_result_label('Images missing alt tag', missing_alt_count <= 0, 0, missing_alt_count));
 
-        cont.append(tests_box);
     };
 
     this.get_missing_alt_count = function(html){
@@ -97,7 +103,7 @@ function PageAnalyzer(cont, url){
                     .append(self.add_result_label('Keyword in h1', in_h1, 'Yes', 'No'))
                     .append(self.add_result_label('Keyword in first p tag', in_first_paragraph, 'Yes', 'No'))
                     .append(self.add_result_label('Word Count', true, word_count, ''))
-                    .append(self.add_result_label('Keyword Density', true, density+'%', ''))
+                    .append(self.add_result_label('Keyword Density', true, density+'%', ''));
 
                 self.cont.append(layout);
             }
@@ -109,6 +115,11 @@ function PageAnalyzer(cont, url){
     this.init = function(){
         // Google Preview Section
         this.cont.append('<h2>Google Preview</h2>');
+        var preview_d   = this.create_layout('Desktop').appendTo(this.cont),
+            preview_m   = this.create_layout('Mobile').appendTo(this.cont);
+        preview_d.find('.field.text').append(this.create_google_preview('desktop'));
+        preview_m.find('.field.text').append(this.create_google_preview('mobile'));
+        this.meta_data_handler();
 
         // Tests Section
         this.cont.append('<h2>SEO Tests</h2>');
@@ -134,7 +145,7 @@ function PageAnalyzer(cont, url){
                 self.create_other_tests_box(data, cont);
             }
         });
-    }
+    };
 
     this.init();
 }
@@ -148,4 +159,4 @@ jQuery.extend(jQuery.expr[':'], {
 
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
-}
+};

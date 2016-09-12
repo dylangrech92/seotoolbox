@@ -25,7 +25,7 @@ class SEOTestSiteTreeController extends Controller{
         // Sprite Location needs to be dynamic as devs can install module in different locations
         $sprite_path = $this->config()->get('sprite_path');
         if ($sprite_path === null) $sprite_path = SEOTOOLBOX_DIR . '/css/icons/icon_sprite.png';
-        Requirements::customCSS(".icon{width:16px;height: 16px;cursor:pointer;background: url({$sprite_path});}");
+        Requirements::customCSS(".icon{width:16px;height: 16px;cursor:pointer;background: url(/{$sprite_path});}");
 
         // CSS can be replaced by devs if they desire to change styling
         $css = $this->config()->get('css');

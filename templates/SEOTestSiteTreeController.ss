@@ -3,6 +3,7 @@
 	<head>
 		<title>SEO Toolbox Analysis</title>
 		<meta name="robots" content="noindex">
+        <base href="/" target="_blank">
 	</head>
 	
 	<body>

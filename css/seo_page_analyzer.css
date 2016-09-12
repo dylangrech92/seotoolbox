@@ -1,4 +1,4 @@
-#search_snippet{
+.search_snippet{
     font-family: arial,sans-serif;
     width: 528px;
     background-color: #fff;
@@ -6,7 +6,7 @@
     margin-bottom: 16px;
 }
 
-#search_snippet h3{
+.field.text .search_snippet h3{
     font-style: normal;
     font-weight: bold;
     color: #1122CC;
@@ -15,11 +15,13 @@
     font-size: medium;
     font-family: arial,sans-serif;
     text-decoration: underline;
-    margin-bottom: 4px;
+    margin: 0 0 4px 0;
     overflow: hidden;
+    background: #FFF;
+    padding: 0;
 }
 
-#search_snippet .search_url{
+.search_snippet .search_url{
     font-size: 14px !important;
     display: inline-block;
     color: #009933;
@@ -33,7 +35,7 @@
 .result_cont{margin-top: 1px;background: #FFF;padding: 5px 20px;}
 .result_cont h2{background:#FFF;color:#444;text-align:center;font-size:24px;text-transform:uppercase;border-bottom:solid 1px #EEE;padding-bottom:5px;}
 .result_cont h3{background:#0099cc;padding:5px;color:#FFF;margin: 0 2% 0px 2%;}
-.result_cont .field{border:none;box-shadow:none;-moz-box-shadow:none;-o-box-shadow:none;-webkit-box-shadow:none;margin: 2% 2% 0 1.5%;}
+.result_cont .field{border:none;box-shadow:none;-moz-box-shadow:none;-o-box-shadow:none;-webkit-box-shadow:none;margin: 2% 2% 0 2.5%;}
 .result_cont .keyword_search{padding: 5px 0 20px 0;}
 .result_cont .keyword_search .text{margin-right:10px}
 .result_cont .keyword_search button .ui-button-text{padding: 0.6em 2em}
