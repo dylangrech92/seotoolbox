@@ -48,7 +48,7 @@ class SEOToolboxControllerExtension extends Extension{
         // Clean out the html before sending it back to minimize response size
         die(
             preg_replace(array(
-                '/<(link|style)(.*?)[>]/im',
+                '/<style(.*?)[>]/im',
                 '/<(script|noscript)(.*?)<\/(script|noscript)[>]/im',
                 '/<!--(.*?)-->/im',
             ), '', $this->owner->customise($customize)->render())

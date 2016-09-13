@@ -75,7 +75,7 @@
 		testMetaTitle: function( url, html ){
 			var title       = html.filter( 'title' ),
                 canonical   = this.getCanonicalUrl(html);
-				  
+
 			if( title.length < 1 ){
 				this.createRow( 'TitlePresent', url );
 			}else{
