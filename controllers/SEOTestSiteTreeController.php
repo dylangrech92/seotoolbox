@@ -143,9 +143,10 @@ class SEOTestSiteTreeController extends Controller{
 
     private function getHTMLFieldsData($data){
         preg_match_all('/\[\*\*\[(.*?)\]\*\*\[(.*?)\]\*\*\]/im', $data, $matches);
+        $clean_out_regex = array('/(\r\n|\n|\r)/m', '/[ ]{2,}/m');
         foreach( $matches[2] as $key => $field_text ){
             $matches[2][$key] = base64_decode($field_text);
-            $matches[3][$key] = strip_tags($matches[2][$key]);
+            $matches[3][$key] = preg_replace($clean_out_regex, ' ', strip_tags($matches[2][$key]));
         }
         return $matches;
     }

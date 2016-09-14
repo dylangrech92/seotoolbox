@@ -42,7 +42,10 @@ function PageAnalyzer(cont, url){
 
     this.get_word_count = function(phrases){
         var count = 0;
-        for(var phrase in phrases) count += phrases[phrase].split(' ').length;
+        for(var phrase in phrases) {
+            var words = phrases[phrase].split(' ');
+            for (var w in words) if (words[w].length > 2) count++;
+        }
         return count;
     };
 

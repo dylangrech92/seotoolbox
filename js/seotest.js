@@ -254,7 +254,10 @@
 
         getWordCount: function(sentences){
             var count = 0;
-		    for( var sentence in sentences ) count += sentences[sentence].split(' ').length;
+            for(var sentence in sentences) {
+                var words = sentences[sentence].split(' ');
+                for (var w in words) if (words[w].length > 2) count++;
+            }
             return count;
         },
 

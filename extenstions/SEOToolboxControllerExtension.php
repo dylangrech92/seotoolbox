@@ -45,12 +45,14 @@ class SEOToolboxControllerExtension extends Extension{
             }
         }
 
+        Requirements::clear();
+
         // Clean out the html before sending it back to minimize response size
         die(
             preg_replace(array(
-                '/<style(.*?)[>]/im',
-                '/<(script|noscript)(.*?)<\/(script|noscript)[>]/im',
-                '/<!--(.*?)-->/im',
+                '/<style\b[^>]*>([\s\S]*?)<\/style>/im',
+                '/<script\b[^>]*>([\s\S]*?)<\/script>/im',
+                '/<!--([\s\S]*?)-->/im',
             ), '', $this->owner->customise($customize)->render())
         );
 	}
