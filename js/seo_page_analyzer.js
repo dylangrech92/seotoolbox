@@ -8,7 +8,7 @@ function PageAnalyzer(cont, url){
 
     this.create_google_preview = function(agent){
         this.preview[agent] = $('<div class="search_snippet"></div>')
-            .append('<h3></h3><div class="search_url"></div><p></p>');
+            .append('<div class="g gtitle"></div><div class="g gurl"></div><div class="g gdesc"></div>');
         return this.preview[agent];
     };
 
@@ -17,17 +17,22 @@ function PageAnalyzer(cont, url){
 
         $('#Form_EditForm_Title, #Form_EditForm_MetaTitle, #Form_EditForm_MetaDescription, input[name="URLSegment"]').change(function(){
             var title   = $('#Form_EditForm_MetaTitle').val() || $('#Form_EditForm_Title').val(),
-                url     = $('input[name="URLSegment"]').attr('data-prefix') + self.url;
+                url     = $('input[name="URLSegment"]').attr('data-prefix') + self.url,
+                desc    = $('#Form_EditForm_MetaDescription').val();
 
             for(var agent in self.preview){
-                self.preview[agent].find('h3').html(title);
-                self.preview[agent].find('.search_url').html(url);
-                self.preview[agent].find('p').html($('#Form_EditForm_MetaDescription').val());
+                self.preview[agent].find('.gtitle').html(title);
+                self.preview[agent].find('.gurl').html(self.truncate(url, 115));
+                self.preview[agent].find('.gdesc').html(self.truncate(desc, (agent) == 'mobile' ? 120 : 156));
             }
         });
 
         $('#Form_EditForm_Title').trigger('change');
     };
+
+    this.truncate = function(text, limit){
+        return (text.length > limit) ? text.substr(0, limit-2) + '...' : text;
+    },
 
     this.add_result_label = function(title, test, text_true, text_false){
         var span = '<span class="'+(test ? 'green' : 'red')+'">'+(test ? text_true : text_false)+'</span>';
@@ -42,10 +47,7 @@ function PageAnalyzer(cont, url){
 
     this.get_word_count = function(phrases){
         var count = 0;
-        for(var phrase in phrases) {
-            var words = phrases[phrase].split(' ');
-            for (var w in words) if (words[w].length > 2) count++;
-        }
+        for(var phrase in phrases) count += phrases[phrase].split(' ').length;
         return count;
     };
 
@@ -70,8 +72,9 @@ function PageAnalyzer(cont, url){
         return count;
     };
 
-    this.create_layout = function(title){
-        return $('<div class="result_side_cont '+title.toLowerCase()+'"></div>')
+    this.create_layout = function(title, extraCSS){
+        extraCSS = (extraCSS) ? extraCSS : '';
+        return $('<div class="result_side_cont '+title.toLowerCase()+' '+extraCSS+'"></div>')
             .append($('<h3>'+title+'</h3>'))
             .append($('<div class="field text"></div>'));
     };
@@ -118,8 +121,8 @@ function PageAnalyzer(cont, url){
     this.init = function(){
         // Google Preview Section
         this.cont.append('<h2>Google Preview</h2>');
-        var preview_d   = this.create_layout('Desktop').appendTo(this.cont),
-            preview_m   = this.create_layout('Mobile').appendTo(this.cont);
+        var preview_d   = this.create_layout('Desktop', 'google').appendTo(this.cont),
+            preview_m   = this.create_layout('Mobile', 'google').appendTo(this.cont);
         preview_d.find('.field.text').append(this.create_google_preview('desktop'));
         preview_m.find('.field.text').append(this.create_google_preview('mobile'));
         this.meta_data_handler();
