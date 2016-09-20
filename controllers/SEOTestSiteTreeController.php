@@ -28,13 +28,22 @@ class SEOTestSiteTreeController extends Controller{
         Requirements::customCSS(".icon{width:16px;height: 16px;cursor:pointer;background: url(/{$sprite_path});}");
 
         // CSS can be replaced by devs if they desire to change styling
+        Requirements::css(SEOTOOLBOX_DIR.'/third-party/bootstrap/css/bootstrap.min.css');
+        Requirements::css(SEOTOOLBOX_DIR.'/third-party/bootstrap/css/bootstrap-theme.min.css');
         $css = $this->config()->get('css');
         if ($css === null) $css = array(SEOTOOLBOX_DIR . '/fonts/lato/lato.css', SEOTOOLBOX_DIR . '/css/seotest.css');
         Requirements::combine_files('seotest.css', $css);
 
+//        Requirements::combine_files('seotest.js', array(
+//            SEOTOOLBOX_DIR . '/js/jquery-1.12.0.js',
+//            SEOTOOLBOX_DIR . '/js/seotest.js'
+//        ));
+
         Requirements::combine_files('seotest.js', array(
             SEOTOOLBOX_DIR . '/js/jquery-1.12.0.js',
-            SEOTOOLBOX_DIR . '/js/seotest.js'
+            SEOTOOLBOX_DIR . '/js/default_tests.js',
+            SEOTOOLBOX_DIR . '/js/crawler.js',
+            SEOTOOLBOX_DIR . '/js/crawler_init.js'
         ));
     }
 
@@ -143,10 +152,9 @@ class SEOTestSiteTreeController extends Controller{
 
     private function getHTMLFieldsData($data){
         preg_match_all('/\[\*\*\[(.*?)\]\*\*\[(.*?)\]\*\*\]/im', $data, $matches);
-        $clean_out_regex = array('/(\r\n|\n|\r)/m', '/[ ]{2,}/m');
         foreach( $matches[2] as $key => $field_text ){
             $matches[2][$key] = base64_decode($field_text);
-            $matches[3][$key] = preg_replace($clean_out_regex, ' ', strip_tags($matches[2][$key]));
+            $matches[3][$key] = strip_tags($matches[2][$key]);
         }
         return $matches;
     }

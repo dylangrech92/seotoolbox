@@ -1,30 +1,24 @@
-body,html{width:100%;background:#F3F3F3;font-family:'Lato';font-weight:100;margin:0;padding:0}
-table{width:100%;}
-small{font-size:13px;line-height: 22px;}
+body,html{background: #222a2d;font-family:'Lato';}
 .left{float:left;}
 .right{float:right;}
+.text-white{color:#FFF}
+.bg-dark{background: #222a2d;}
+.popup-settings{padding:20px 0 10px 0}
 .icon{width:16px;height: 16px;cursor:pointer;background: url('/segmentmodules/seotoolbox/css/icons/icon_sprite.png');}
 .icon.closed{background-position: 0px -34px;position: absolute;top: 17px;right: 36px;}
 .icon.opened{background-position: 0px 0px;position: absolute;top: 17px;right: 36px;}
 .icon.export{background-position: 0px -17px;position: absolute;top: 17px;right: 10px;}
-.wrapper{width:80%;margin:20px auto;position: relative;}
-.header{width:100%;background:#595959;color:#FFF;text-align:center}
+.container-default{margin: 0 auto;position: relative;background: #273135;padding-bottom:20px}
+.wrapper{width:80%}
+.header{width:100%;color:#FFF;}
 .header h1, .header h2{padding:20px 0;margin:0;font-weight:100;line-height: 30px;}
-.header table{background:#a6a6a6;padding:10px 0;border-top:solid 1px #AAA}
+.main-header table{padding:10px 0;}
+.main-header .stats table td, .main-header .stats table th{border: none;border-bottom: solid 1px #273135;}
 .infobox{background:#FFF;margin-top:20px;}
 .infobox .header{background:#0066cc;line-height: 30px;position: relative;}
-.infobox h2{padding:10px 0;}
-.infobox table{padding-bottom:10px}
-.infobox thead{background:#E9E9E9;}
-.infobox tbody tr:first-child td{padding-top:10px}
-.infobox tbody tr td{border-bottom:solid 1px #EEE}
-.infobox tbody tr:last-child td{border:none}
-.infobox th, .infobox td{text-align:left;padding:3px 10px;font-weight:100}
-.infobox td{color:#444;font-weight:600;min-width:150px;min-width:300px;word-break: break-word;}
-.infobox a{color:#595959}
-.infobox a:hover{color:#ff6600}
+.infobox h2{padding:10px;}
 .infobox .count{font-weight:900;font-size:18px;padding:0 20px;line-height:50px;background:#0099cc;}
-
+.infobox thead{color:#FFF}
 .shader{width:100%;height:100%;position:fixed;top:0;left:0;background:#F3F3F3;z-index:1000}
 .popup{position:fixed;top:50px;left:30%;width:40%;z-index:2000;background:#FFF;padding:20px;text-align:center}
 .popup h1{text-align:center;color:#0099cc;text-transform:uppercase;font-weight:bold;font-size:36px;padding:0;margin:5px 0 10px 0;}
@@ -32,5 +26,11 @@ small{font-size:13px;line-height: 22px;}
 .popup label{line-height:30px;float:left;padding:0px 0px 0 5px;margin-bottom:20px;}
 .popup button{display:block;clear:both;width:20%;margin-left:40%;padding:10px;font-size:20px;text-transform:uppercase;font-weight:bold;background:#E9E9E9;border:none;}
 .popup button:hover{color:#FFF;background:#0066CC;cursor:pointer}
-
-
+.infobox.purple .header, .infobox.purple thead{background:#80718e}
+.infobox.purple .header .count{background:#564769}
+.infobox.red .header, .infobox.red thead{background:#903d3d}
+.infobox.red .header .count{background:#733535}
+.infobox.green .header, .infobox.green thead{background:#3d9057}
+.infobox.green .header .count{background:#236538}
+.infobox.blue .header, .infobox.blue thead{background:#458e9a}
+.infobox.blue .header .count{background:#33656d}
