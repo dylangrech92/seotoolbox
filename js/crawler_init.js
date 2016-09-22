@@ -13,7 +13,7 @@
                 for( var i in default_tests ){
                     var test = default_tests[i];
                     crawler.regiser_test(test.name, test.title, test.headers, test.callback);
-                    crawler_painer.set_type(test.name, test.type);
+                    crawler_painter.set_type(test.name, test.type);
                 }
 
                 // Que initial urls

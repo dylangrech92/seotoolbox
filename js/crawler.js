@@ -23,7 +23,7 @@ const crawler = {
         if(title == undefined) throw 'Title not specified';
         if(!(headers instanceof Array) || headers.length < 1) throw 'Headers array is invalid';
         if(typeof callable != 'function') throw 'Invalid callback';
-        this.tests.push({name: name, title: title, callback: callable, cont:crawler_painer.create(name, title, headers)});
+        this.tests.push({name: name, title: title, callback: callable, cont:crawler_painter.create(name, title, headers)});
     },
 
     /**
@@ -278,7 +278,7 @@ const crawler = {
      * @param {Array} data
      */
     add_row: function(name, data){
-        crawler_painer.add_row(name, data);
+        crawler_painter.add_row(name, data);
     },
 
     /**
@@ -318,12 +318,12 @@ const crawler = {
         // Every second try to initialize a new crawl request just in-case something crashes
         this.interval = setInterval(function(){ crawler.fetch_and_test(); }, 1000);
 
-        crawler_painer.init();
+        crawler_painter.init();
         this.trigger('AFTER_INIT', []);
     }
 };
 
-const crawler_painer = {
+const crawler_painter = {
 
     containers: [],
 
@@ -389,12 +389,62 @@ const crawler_painer = {
         for(var d in data) row.append($('<td/>').append(data[d]));
 
         // Show icons if we have items
-        if( len > 1 ){
+        if( len > 0 ){
             cont.find('.icon.export').fadeIn();
             cont.find('.icon.toggle').fadeIn();
         }
 
         cont.find('.count').html(len);
+
+        // Set the header colour
+        if( cont.find('td div.alert-danger').length > 0 ) crawler_painter.set_type(name, 'error');
+        else if( cont.find('td div.alert-warning').length > 0 ) crawler_painter.set_type(name, 'warning');
+        else if( cont.find('td div.alert-info').length > 0 ) crawler_painter.set_type(name, 'info');
+        else if( cont.find('td div.alert-success').length > 0 ) crawler_painter.set_type(name, 'success');
+    },
+
+    /**
+     * Reset the data inside of the table for the container named {name}
+     *
+     * @param {string} name
+     * @param {string|undefined} type
+     */
+    reset_table: function(name, type){
+        this.get_container_by_name(name).find('tbody tr').remove();
+        if( type != undefined ) this.set_type(name, type);
+    },
+
+    /**
+     * Create a status field to be used in the report rows
+     *
+     * @param string type
+     * @param string text
+     */
+    create_status: function(type, text){
+        var ret = $('<div class="status-text alert"></div>');
+        switch(type){
+            case 'info':
+                ret.addClass('alert-info');
+                ret.append('<i class="glyphicon glyphicon-info-sign">&nbsp;</i>');
+                break;
+
+            case 'error':
+                ret.addClass('alert-danger');
+                ret.append('<i class="glyphicon glyphicon-exclamation-sign">&nbsp;</i>');
+                break;
+
+            case 'success':
+                ret.addClass('alert-success');
+                ret.append('<i class="glyphicon glyphicon-ok-sign">&nbsp;</i>');
+                break;
+
+            case 'warning':
+                ret.addClass('alert-warning');
+                ret.append('<i class="glyphicon glyphicon-warning-sign">&nbsp;</i>');
+                break;
+        }
+        ret.append(text);
+        return ret;
     },
 
     /**
@@ -414,11 +464,14 @@ const crawler_painer = {
      * @param {string} type
      */
     set_type: function(name, type){
+        var cont = this.get_container_by_name(name);
+        cont.removeClass('blue red green yellow purple');
         switch(type){
-            case 'info': return this.get_container_by_name(name).addClass('blue');
-            case 'error': return this.get_container_by_name(name).addClass('red');
-            case 'success': return this.get_container_by_name(name).addClass('green');
-            default: return this.get_container_by_name(name).addClass('purple');
+            case 'info': return cont.addClass('blue');
+            case 'error': return cont.addClass('red');
+            case 'success': return cont.addClass('green');
+            case 'warning': return cont.addClass('yellow');
+            default: return cont.addClass('purple');
         }
     },
 
@@ -441,7 +494,8 @@ const crawler_painer = {
      */
     create_link: function(url, anchor){
         anchor = (anchor) ? anchor : url;
-        return '<a href="'+url+'" target="_blank" rel="nofollo">'+anchor+'</a>';
+        return '<a class="btn btn-link" href="'+url+'" target="_blank" rel="nofollow">'
+                +'<span class="glyphicon glyphicon-new-window">&nbsp;</span>'+anchor+'</a>';
     },
 
     /**

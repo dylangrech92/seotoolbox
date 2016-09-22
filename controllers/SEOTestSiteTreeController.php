@@ -34,11 +34,6 @@ class SEOTestSiteTreeController extends Controller{
         if ($css === null) $css = array(SEOTOOLBOX_DIR . '/fonts/lato/lato.css', SEOTOOLBOX_DIR . '/css/seotest.css');
         Requirements::combine_files('seotest.css', $css);
 
-//        Requirements::combine_files('seotest.js', array(
-//            SEOTOOLBOX_DIR . '/js/jquery-1.12.0.js',
-//            SEOTOOLBOX_DIR . '/js/seotest.js'
-//        ));
-
         Requirements::combine_files('seotest.js', array(
             SEOTOOLBOX_DIR . '/js/jquery-1.12.0.js',
             SEOTOOLBOX_DIR . '/js/default_tests.js',
