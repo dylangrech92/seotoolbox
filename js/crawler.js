@@ -179,6 +179,17 @@ const crawler = {
     },
 
     /**
+     * Checks if the href passed is an anchor link for url passed.
+     *
+     * @param {string} href
+     * @param {string} url
+     * @return {boolean}
+     */
+    is_anchor: function(href, url){
+        return href.indexOf('#') >= 0 && this.sanitize(href) == this.sanitize(url);
+    },
+
+    /**
      * Fetch the next url from the que and run the tests on it
      */
     fetch_and_test: function(){

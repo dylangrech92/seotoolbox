@@ -77,14 +77,14 @@ const default_tests = [
             for( var field in field_data[2] ) {
                 $.each($(field_data[2][field]).find('a'), function () {
                     var href = $(this).attr('href');
-                    if(href && !crawler.is_external(href)) art_links.push(href);
+                    if(href && !crawler.is_external(href) && !crawler.is_anchor(href, url)) art_links.push(href);
                 });
             }
 
             // Full page links
             $.each(html.find('a'), function () {
                 var href = $(this).attr('href');
-                if(href && !crawler.is_external(href)) links.push(href);
+                if(href && !crawler.is_external(href) && !crawler.is_anchor(href, url)) links.push(href);
             });
 
             var art_word_count  = crawler.get_word_count(field_data[3]),
