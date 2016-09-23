@@ -169,7 +169,7 @@ class SEOTestSiteTreeController extends Controller{
         curl_setopt( $ch, CURLOPT_HTTPHEADER, array( 'X-Crawl-Id: '.$crawl_id ) );
         $data = curl_exec( $ch );
 
-        $fetched        = str_replace(Director::absoluteBaseURL(), '', curl_getinfo($ch, CURLINFO_EFFECTIVE_URL));
+        $fetched        = parse_url(curl_getinfo($ch, CURLINFO_EFFECTIVE_URL), PHP_URL_PATH);
         $header_size    = curl_getinfo( $ch, CURLINFO_HEADER_SIZE );
         $header 	    = explode( "\r\n\r\n", substr( $data, 0, $header_size ) );
         array_pop( $header ); // Remove last element as it will always be empty
