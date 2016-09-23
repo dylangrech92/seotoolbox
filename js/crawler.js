@@ -14,7 +14,7 @@ const crawler = {
      *
      * @param {string} name
      * @param {string} title
-     * @param {array} headers
+     * @param {Array} headers
      * @param {string} callable
      * @returns {boolean}
      * @throws Exception
@@ -23,7 +23,7 @@ const crawler = {
         if(name == undefined || this.get_test_by_name(name)) throw 'Invalid name specified for your test';
         if(title == undefined) throw 'Title not specified';
         if(!(headers instanceof Array) || headers.length < 1) throw 'Headers array is invalid';
-        if(typeof callable != 'function') throw 'Invalid callback';
+        if(typeof callable != 'function') return crawler_painter.create(name, title, headers);
         this.tests.push({name: name, title: title, callback: callable, cont:crawler_painter.create(name, title, headers)});
     },
 

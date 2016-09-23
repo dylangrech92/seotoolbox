@@ -36,8 +36,8 @@ class SEOTestSiteTreeController extends Controller{
 
         Requirements::combine_files('seotest.js', array(
             SEOTOOLBOX_DIR . '/js/jquery-1.12.0.js',
-            SEOTOOLBOX_DIR . '/js/default_tests.js',
             SEOTOOLBOX_DIR . '/js/crawler.js',
+            SEOTOOLBOX_DIR . '/js/default_tests.js',
             SEOTOOLBOX_DIR . '/js/crawler_init.js'
         ));
     }
@@ -132,7 +132,7 @@ class SEOTestSiteTreeController extends Controller{
     public function urlsAndSettings( SS_HTTPRequest $request ){
         Requirements::clear();
         return json_encode(array(
-            'urls' => SiteTree::get()
+            'urls' => Versioned::get_by_stage('SiteTree', 'Live')
                 ->exclude( 'ClassName', 'RedirectorPage' )
                 ->exclude( 'ClassName', 'ErrorPage' )
                 ->map( 'ID', 'AbsoluteLink' )

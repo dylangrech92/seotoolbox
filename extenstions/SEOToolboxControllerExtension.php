@@ -45,6 +45,11 @@ class SEOToolboxControllerExtension extends Extension{
             }
         }
 
+        if( in_array($this->owner->ClassName, ClassInfo::subclassesFor('ErrorPage')) ){
+            header("HTTP/1.0 405 Instance of ErrorPage");
+            die();
+        }
+
         // Clean out the html before sending it back to minimize response size
         die(
             preg_replace(array(

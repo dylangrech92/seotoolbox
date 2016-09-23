@@ -7,6 +7,13 @@
  */
 const default_tests = [
     {
+        name: 'error_pages',
+        title: 'ERROR PAGES',
+        headers: ['URL'],
+        type: 'success'
+    },
+
+    {
         name : 'h1_info',
         title: 'H1 INFO',
         headers: ['URL', 'Count', 'Text', 'Status'],
@@ -88,7 +95,7 @@ const default_tests = [
                 dens_text       = (density != false) ? density.toFixed(2) +' words : 1 link' : 'No internal links',
                 status          = undefined;
 
-            if( art_density < 100 || density < 25 )
+            if( ( art_density !== false && art_density < 100 ) || ( density !== false && density < 25 ) )
                 status = crawler_painter.create_status('warning', 'This page might be considered spammy');
 
             if(links.length > 0)
@@ -368,3 +375,8 @@ const default_tests = [
         }
     }
 ];
+
+crawler.on('CRAWL_LOAD_FAILED', function(url){
+    crawler_painter.add_row('error_pages', [url]);
+    crawler_painter.set_type('error_pages', 'error');
+});
