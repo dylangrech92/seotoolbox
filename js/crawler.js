@@ -2,6 +2,7 @@ const crawler = {
 
     que             : [],
     tested          : [],
+    crawling        : [],
     tests           : [],
     ignore_paths    : [],
     crawl_id        : undefined,
@@ -141,7 +142,8 @@ const crawler = {
      */
     can_crawl: function(url){
         if(url == undefined) return false;
-        return !(this.tested.indexOf(url) >= 0 || this.is_file(url) || this.ignore_url(url) || this.is_external(url));
+        return !(this.crawling.indexOf(url) >= 0 || this.tested.indexOf(url) >= 0 ||
+                    this.is_file(url) || this.ignore_url(url) || this.is_external(url));
     },
 
     /**
@@ -165,7 +167,7 @@ const crawler = {
      */
     is_external: function(url){
         // Starts with / or # or doesn't have :// in it has to be internal
-        if( url[0] == '/' || url[0] == '#' || url.indexOf('://') < 0 ) return false;
+        if( url.length < 1 || url[0] == '/' || url[0] == '#' || url.indexOf('://') < 0 ) return false;
 
         // If we removed the domain and the url is still the same then it's an internal link without the leading /
         if( url == this.sanitize( url ) ) return false;
@@ -183,24 +185,37 @@ const crawler = {
         if( !this.que || this.que.length < 1 || this.que.length < 1 || $.active > 2 ) return false;
 
         var url = this.que.pop();
-        this.tested.push(url);
+        this.crawling.push(url);
 
         $.ajax({
             url: this.get_proxy( url ), data: { agent: this.useragent }, accepts: 'json', dataType: 'json'
         })
             .done(function( result ) {
                 if(result['headers'] && result['body'] && result['body'].toLowerCase().indexOf('<head') >= 0) {
-                    var html = $(crawler.strip_img_src(result['body']));
-                    crawler.trigger('CRAWL_BEFORE_TESTS', [url]);
-                    crawler.fetch_links(html, url);
-                    crawler.run_tests(url, html, result['headers'], result['field_data'], result['phrases']);
-                    crawler.trigger('CRAWL_AFTER_TESTS', [url]);
-                }else{
+                    if( !crawler.is_external(result['url_fetched']) ) {
+                        var fetched_url = crawler.sanitize(result['url_fetched']);
+                        if(fetched_url != url){
+                            // We hit a redirect but already crawled the destination
+                            if(crawler.tested.indexOf(fetched_url) >= 0) return true;
+                            url = fetched_url;
+                        }
+
+                        var html = $(crawler.strip_img_src(result['body']));
+                        crawler.trigger('CRAWL_BEFORE_TESTS', [url]);
+                        crawler.fetch_links(html, url);
+                        crawler.run_tests(url, html, result['headers'], result['field_data'], result['phrases']);
+                        crawler.trigger('CRAWL_AFTER_TESTS', [url]);
+                        return true;
+                    }
+
                     crawler.trigger('CRAWL_LOAD_FAILED', [url]);
                 }
             })
-            .fail( function(){ crawler.trigger('CRAWL_LOAD_FAILED', [url]) })
-            .always( function(){ crawler.trigger('CRAWL_FINISHED', [url]) });
+            .fail( function(){ crawler.trigger('CRAWL_LOAD_FAILED', [url]); })
+            .always( function(){
+                crawler.trigger('CRAWL_FINISHED', [url]);
+                if(crawler.tested.indexOf(url) < 0 ) crawler.tested.push(url)
+            });
     },
 
     /**
