@@ -57,6 +57,48 @@ const default_tests = [
     },
 
     {
+        name : 'int_link_info',
+        title: 'INTERNAL LINK INFO',
+        headers: ['URL', 'Article Links', 'Article Link Count', 'Article Density',
+                    'Total Link Count', 'Total Density', 'Status'],
+        type: 'info',
+        callback: function(cont, url, html, headers, field_data, phrases){
+            var link = crawler_painter.create_link(url, url),
+                art_links = [], links = [];
+
+            // Article links
+            for( var field in field_data[2] ) {
+                $.each($(field_data[2][field]).find('a'), function () {
+                    var href = $(this).attr('href');
+                    if(href && !crawler.is_external(href)) art_links.push(href);
+                });
+            }
+
+            // Full page links
+            $.each(html.find('a'), function () {
+                var href = $(this).attr('href');
+                if(href && !crawler.is_external(href)) links.push(href);
+            });
+
+            var art_word_count  = crawler.get_word_count(field_data[3]),
+                art_density     = (art_links.length > 0) ? art_word_count / art_links.length : false,
+                art_dens_text   = (art_density != false) ? art_density.toFixed(2) +' words : 1 link' : 'No internal links',
+                word_count      = crawler.get_word_count(phrases),
+                density         = (links.length > 0) ? word_count / links.length : false,
+                dens_text       = (density != false) ? density.toFixed(2) +' words : 1 link' : 'No internal links',
+                status          = undefined;
+
+            if( art_density < 100 || density < 25 )
+                status = crawler_painter.create_status('warning', 'This page might be considered spammy');
+
+            if(links.length > 0)
+                crawler_painter.add_row( this.name, [
+                    link, art_links.join('<br />'), art_links.length, art_dens_text, links.length, dens_text, status
+                ]);
+        }
+    },
+
+    {
         name : 'ext_link_info',
         title: 'EXTERNAL LINK INFO',
         headers: ['URL', 'External Link Count', 'External Links', 'Follow Links Count', 'Follow Links', 'Status'],
@@ -68,11 +110,11 @@ const default_tests = [
             for( var field in field_data[2] ) {
                 $.each($(field_data[2][field]).find('a'), function () {
                     var $this = $(this),
-                        link = $this.attr('href');
-                    if(link && crawler.is_external(link)){
-                        links.push(link);
+                        href = $this.attr('href');
+                    if(href && crawler.is_external(href)){
+                        links.push(href);
                         if(!$this.attr('rel') || $this.attr('rel').toLowerCase().indexOf('nofollow') < 0)
-                            follow.push(link);
+                            follow.push(href);
                     }
                 });
             }
@@ -81,7 +123,7 @@ const default_tests = [
             if(links.length > 0)
                 crawler_painter.add_row(
                     this.name,
-                    [link, links.length, links.join(', '), follow.length, follow.join('<br />'), status]
+                    [link, links.length, links.join('<br />'), follow.length, follow.join('<br />'), status]
                 );
         }
     },
@@ -243,10 +285,7 @@ const default_tests = [
             if( url.length > 115 )                  msg = 'URL is too long';
             else if( url.toLowerCase() != url )     msg = 'URL is not in lower case';
             else if( url.replace('_','') !== url )  msg = 'URL contains under scores';
-            else{
-                type = 'success';
-                msg = 'OK!';
-            }
+            else return true;
 
             crawler_painter.add_row(this.name, [link, crawler_painter.create_status(type, msg)]);
         }
@@ -285,6 +324,46 @@ const default_tests = [
 
             function getKeyFromObject(object, search){
                 for( var key in object ) if( object[key].indexOf(search) >= 0 ) return key;
+            }
+        }
+    },
+
+    {
+        name: 'href_langs',
+        title: 'LANG TAGS',
+        headers: ['URL', 'Tags'],
+        type: 'info',
+        callback: function(cont, url, html){
+            var link    = crawler_painter.create_link(url, url),
+                tags    = [];
+
+            $.each( html.filter( 'link' ), function(){
+                if( $(this).attr( 'hreflang' ) )
+                    tags.push( $('<p>').text( $(this).clone().wrap('<p>').parent().html() ).html() );
+            });
+
+            if( tags.length > 0 ) crawler_painter.add_row(this.name, [link, tags.join('<br />')] );
+        }
+    },
+
+    {
+        name: 'orphan_pages',
+        title: 'ORPHAN PAGES',
+        headers: ['URL'],
+        type: 'success',
+        callback: function(){
+            crawler_painter.reset_table(this.name, 'success');
+
+            pages_loop:
+            for( var i in crawler.tested ){
+                var url = crawler.tested[i];
+                if( crawler.linked_from.hasOwnProperty(url) ) {
+                    for (var x in crawler.linked_from[url])
+                        if (crawler.linked_from[url][x] != url) continue pages_loop;
+                }
+
+                crawler.add_row(this.name, [crawler_painter.create_link(crawler.tested[i], crawler.tested[i])]);
+                crawler_painter.set_type(this.name, 'error');
             }
         }
     }

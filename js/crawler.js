@@ -6,6 +6,7 @@ const crawler = {
     ignore_paths    : [],
     crawl_id        : undefined,
     events          : {},
+    linked_from     : {},
     useragent       : 'desktop',
 
     /**
@@ -191,7 +192,7 @@ const crawler = {
                 if(result['headers'] && result['body'] && result['body'].toLowerCase().indexOf('<head') >= 0) {
                     var html = $(crawler.strip_img_src(result['body']));
                     crawler.trigger('CRAWL_BEFORE_TESTS', [url]);
-                    crawler.fetch_links(html);
+                    crawler.fetch_links(html, url);
                     crawler.run_tests(url, html, result['headers'], result['field_data'], result['phrases']);
                     crawler.trigger('CRAWL_AFTER_TESTS', [url]);
                 }else{
@@ -204,11 +205,21 @@ const crawler = {
 
     /**
      * Check for links in the html of the rendered page so we add them to the que
+     * and also map how pages are linked to each other
      *
      * @param {jQuery} html
+     * @param {string} url
      */
-    fetch_links: function(html){
-        $.each(html.find('a'), function(){ crawler.que_url( $(this).attr('href') ); });
+    fetch_links: function(html, url){
+        $.each(html.find('a'), function(){
+            var href    = $(this).attr('href'),
+                link    = crawler.sanitize(href);
+
+            crawler.que_url( href );
+
+            if(!crawler.linked_from.hasOwnProperty(link)) crawler.linked_from[link] = [url];
+            else if( crawler.linked_from[link].indexOf(url) < 0 ) crawler.linked_from[link].push(url);
+        });
     },
 
     /**
@@ -362,10 +373,22 @@ const crawler_painter = {
             $this.addClass(css);
         });
 
-        // #TODO: Export Button
         export_button.click(function(){
             crawler.trigger('BEFORE_EXPORT', [name]);
-            // Export
+            var $this       = $(this),
+                rows        = $this.parents( '.infobox' ).first().find( 'table tr' ),
+                csvContent  = "data:text/csv;charset=utf-8,";
+
+            $.each( rows, function(){
+                var item = [];
+                $.each( $(this).find( 'th, td' ), function(){ item.push( $(this).text() ); });
+                csvContent += item.join(',') + "\n";
+            });
+
+            var link = document.createElement( 'a' );
+            link.setAttribute( 'href', encodeURI( csvContent ) );
+            link.setAttribute( 'download', name + '.csv' );
+            link.click();
             crawler.trigger('AFTER_EXPORT', [name]);
         });
 
@@ -410,7 +433,13 @@ const crawler_painter = {
      * @param {string|undefined} type
      */
     reset_table: function(name, type){
-        this.get_container_by_name(name).find('tbody tr').remove();
+        var cont = this.get_container_by_name(name);
+
+        cont.find('tbody tr').remove();
+        cont.find('.count').html('');
+        cont.find('.icon.export').hide();
+        cont.find('.icon.toggle').hide();
+
         if( type != undefined ) this.set_type(name, type);
     },
 
