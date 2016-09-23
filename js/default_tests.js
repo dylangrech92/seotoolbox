@@ -89,10 +89,10 @@ const default_tests = [
 
             var art_word_count  = crawler.get_word_count(field_data[3]),
                 art_density     = (art_links.length > 0) ? art_word_count / art_links.length : false,
-                art_dens_text   = (art_density != false) ? art_density.toFixed(2) +' words : 1 link' : 'No internal links',
+                art_dens_text   = (art_density != false) ? art_density.toFixed(2) +' words/link' : 'No internal links',
                 word_count      = crawler.get_word_count(phrases),
                 density         = (links.length > 0) ? word_count / links.length : false,
-                dens_text       = (density != false) ? density.toFixed(2) +' words : 1 link' : 'No internal links',
+                dens_text       = (density != false) ? density.toFixed(2) +' words/link' : 'No internal links',
                 status          = undefined;
 
             if( ( art_density !== false && art_density < 100 ) )
