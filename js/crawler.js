@@ -204,11 +204,10 @@ const crawler = {
             .done(function( result ) {
                 if(result['headers'] && result['body'] && result['body'].toLowerCase().indexOf('<head') >= 0) {
                     if( !crawler.is_external(result['url_fetched']) ) {
-                        var fetched_url = crawler.sanitize(result['url_fetched']);
-                        if(fetched_url != url){
-                            // We hit a redirect but already crawled the destination
-                            if(crawler.tested.indexOf(fetched_url) >= 0) return true;
-                            url = fetched_url;
+                        url = crawler.sanitize(result['url_fetched']);
+                        if(crawler.tested.indexOf(url) >= 0){
+                            this.skipped = true;
+                            return true;
                         }
 
                         var html = $(crawler.strip_img_src(result['body']));
@@ -218,14 +217,14 @@ const crawler = {
                         crawler.trigger('CRAWL_AFTER_TESTS', [url]);
                         return true;
                     }
-
-                    crawler.trigger('CRAWL_LOAD_FAILED', [url]);
                 }
+                crawler.trigger('CRAWL_LOAD_FAILED', [url]);
             })
             .fail( function(){ crawler.trigger('CRAWL_LOAD_FAILED', [url]); })
             .always( function(){
                 crawler.trigger('CRAWL_FINISHED', [url]);
-                if(crawler.tested.indexOf(url) < 0 ) crawler.tested.push(url)
+                if((this.hasOwnProperty('skipped') && this.skipped) || crawler.tested.indexOf(url) < 0 )
+                    crawler.tested.push(url)
             });
     },
 

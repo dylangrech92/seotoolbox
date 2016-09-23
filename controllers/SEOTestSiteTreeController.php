@@ -149,7 +149,7 @@ class SEOTestSiteTreeController extends Controller{
         preg_match_all('/\[\*\*\[(.*?)\]\*\*\[(.*?)\]\*\*\]/im', $data, $matches);
         foreach( $matches[2] as $key => $field_text ){
             $matches[2][$key] = base64_decode($field_text);
-            $matches[3][$key] = strip_tags($matches[2][$key]);
+            $matches[3][$key] = preg_replace('/[\s]+/mu', ' ', strip_tags($matches[2][$key]));
         }
         return $matches;
     }
@@ -169,12 +169,11 @@ class SEOTestSiteTreeController extends Controller{
         curl_setopt( $ch, CURLOPT_HTTPHEADER, array( 'X-Crawl-Id: '.$crawl_id ) );
         $data = curl_exec( $ch );
 
-        $url_fetched = str_replace( Director::absoluteBaseURL(), '', curl_getinfo($ch, CURLINFO_EFFECTIVE_URL));
         $header_size = curl_getinfo( $ch, CURLINFO_HEADER_SIZE );
         $header 	 = explode( "\r\n\r\n", substr( $data, 0, $header_size ) );
         array_pop( $header ); // Remove last element as it will always be empty
         $header = array_pop( $header );
-        $body   = substr( $data, $header_size );
+        $body   = preg_replace('/[\s]+/mu', ' ', substr( $data, $header_size ));
 
         curl_close( $ch );
 
@@ -183,7 +182,7 @@ class SEOTestSiteTreeController extends Controller{
         $field_data = $this->getHTMLFieldsData($body);
         $body = str_replace($field_data[0], $field_data[2], $body);
 
-        return array( 'headers' => $header, 'body' => $body, 'field_data' => $field_data, 'url_fetched' => $url_fetched );
+        return array( 'headers' => $header, 'body' => $body, 'field_data' => $field_data );
     }
 
     /**
