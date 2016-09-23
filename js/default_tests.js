@@ -220,7 +220,7 @@ const default_tests = [
             }else{
                 text = desc.attr('content');
                 len = text.length;
-                if(len < 140) status = crawler_painter.create_status('warning', 'Meta description is too short');
+                if(len < 70) status = crawler_painter.create_status('warning', 'Meta description is too short');
                 else if(len > 156) status = crawler_painter.create_status('warning', 'Meta description is too long');
                 else status = crawler_painter.create_status('success', 'OK!');
 
