@@ -95,7 +95,7 @@ const default_tests = [
                 dens_text       = (density != false) ? density.toFixed(2) +' words : 1 link' : 'No internal links',
                 status          = undefined;
 
-            if( ( art_density !== false && art_density < 100 ) || ( density !== false && density < 25 ) )
+            if( ( art_density !== false && art_density < 100 ) )
                 status = crawler_painter.create_status('warning', 'This page might be considered spammy');
 
             if(links.length > 0)

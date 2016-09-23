@@ -548,8 +548,10 @@ const crawler_painter = {
      */
     create_link: function(url, anchor){
         anchor = (anchor) ? anchor : url;
-        return '<a class="btn btn-link" href="'+url+'" target="_blank" rel="nofollow">'
-                +'<span class="glyphicon glyphicon-new-window">&nbsp;</span>'+anchor+'</a>';
+        return '<a class="btn btn-link" href="'+url+'" title="'+anchor+'" target="_blank" rel="nofollow">'
+                +'<span class="glyphicon glyphicon-new-window">&nbsp;</span>'+
+                ((anchor.length > 29) ? anchor.substr(0, 27) + '...' : anchor)
+                +'</a>';
     },
 
     /**
