@@ -108,30 +108,30 @@ const default_tests = [
     {
         name : 'ext_link_info',
         title: 'EXTERNAL LINK INFO',
-        headers: ['URL', 'External Link Count', 'External Links', 'Follow Links Count', 'Follow Links', 'Status'],
+        headers: ['URL', 'External Link Count', 'External Links'],
         type: 'success',
         callback: function(cont, url, html, headers, field_data){
             var link = crawler_painter.create_link(url, url),
-                links = [], follow = [], status = '';
+                links = [];
 
             for( var field in field_data[2] ) {
                 $.each($(field_data[2][field]).find('a'), function () {
                     var $this = $(this),
                         href = $this.attr('href');
                     if(href && crawler.is_external(href)){
-                        links.push(href);
-                        if(!$this.attr('rel') || $this.attr('rel').toLowerCase().indexOf('nofollow') < 0)
-                            follow.push(href);
+                        var type = ( !$this.attr('rel') || $this.attr('rel').toLowerCase().indexOf('nofollow') < 0 )
+                            ? 'warning' : 'info';
+                        links.push(
+                            $('<div class="clearfix"></div>').append([
+                                crawler_painter.create_status(type, href),
+                                '<p>&nbsp;</p>'
+                            ])
+                        );
                     }
                 });
             }
 
-            if(follow.length > 0) status = crawler_painter.create_status('warning', 'Page has follow links');
-            if(links.length > 0)
-                crawler_painter.add_row(
-                    this.name,
-                    [link, links.length, links.join('<br />'), follow.length, follow.join('<br />'), status]
-                );
+            if(links.length > 0) crawler_painter.add_row(this.name, [link, links.length, links]);
         }
     },
 
@@ -161,7 +161,7 @@ const default_tests = [
                     (alt > 1) ? alt + ' images missing alt tag' : '1 image missing alt tag');
             else if(fields.length > 0)
                 status = crawler_painter.create_status('warning',
-                    (fields.length > 1) ? fields.join(' and ') + 'are missing images' : fields[0] + ' is missing images');
+                    (fields.length > 1) ? fields.join(' and ') + ' are missing images' : fields[0] + ' is missing images');
             else if(title > 0)
                 status = crawler_painter.create_status('info',
                     (title > 1) ? title + ' images missing title tag' : '1 image is missing title tag');
@@ -357,8 +357,8 @@ const default_tests = [
         name: 'orphan_pages',
         title: 'ORPHAN PAGES',
         headers: ['URL'],
-        type: 'success',
         callback: function(){
+            if(crawler.que.length > 0) return true;
             crawler_painter.reset_table(this.name, 'success');
 
             pages_loop:
