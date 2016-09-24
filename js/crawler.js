@@ -2,10 +2,12 @@ const crawler = {
 
     que             : [],
     tested          : [],
+    crawling        : [],
     tests           : [],
     ignore_paths    : [],
     crawl_id        : undefined,
     events          : {},
+    linked_from     : {},
     useragent       : 'desktop',
 
     /**
@@ -13,7 +15,7 @@ const crawler = {
      *
      * @param {string} name
      * @param {string} title
-     * @param {array} headers
+     * @param {Array} headers
      * @param {string} callable
      * @returns {boolean}
      * @throws Exception
@@ -22,7 +24,7 @@ const crawler = {
         if(name == undefined || this.get_test_by_name(name)) throw 'Invalid name specified for your test';
         if(title == undefined) throw 'Title not specified';
         if(!(headers instanceof Array) || headers.length < 1) throw 'Headers array is invalid';
-        if(typeof callable != 'function') throw 'Invalid callback';
+        if(typeof callable != 'function') return crawler_painter.create(name, title, headers);
         this.tests.push({name: name, title: title, callback: callable, cont:crawler_painter.create(name, title, headers)});
     },
 
@@ -140,7 +142,8 @@ const crawler = {
      */
     can_crawl: function(url){
         if(url == undefined) return false;
-        return !(this.tested.indexOf(url) >= 0 || this.is_file(url) || this.ignore_url(url) || this.is_external(url));
+        return !(this.crawling.indexOf(url) >= 0 || this.tested.indexOf(url) >= 0 ||
+                    this.is_file(url) || this.ignore_url(url) || this.is_external(url));
     },
 
     /**
@@ -164,7 +167,7 @@ const crawler = {
      */
     is_external: function(url){
         // Starts with / or # or doesn't have :// in it has to be internal
-        if( url[0] == '/' || url[0] == '#' || url.indexOf('://') < 0 ) return false;
+        if( url.length < 1 || url[0] == '/' || url[0] == '#' || url.indexOf('://') < 0 ) return false;
 
         // If we removed the domain and the url is still the same then it's an internal link without the leading /
         if( url == this.sanitize( url ) ) return false;
@@ -176,39 +179,72 @@ const crawler = {
     },
 
     /**
+     * Checks if the href passed is an anchor link for url passed.
+     *
+     * @param {string} href
+     * @param {string} url
+     * @return {boolean}
+     */
+    is_anchor: function(href, url){
+        return href.indexOf('#') >= 0 && this.sanitize(href) == this.sanitize(url);
+    },
+
+    /**
      * Fetch the next url from the que and run the tests on it
      */
     fetch_and_test: function(){
         if( !this.que || this.que.length < 1 || this.que.length < 1 || $.active > 2 ) return false;
 
         var url = this.que.pop();
-        this.tested.push(url);
+        this.crawling.push(url);
 
         $.ajax({
             url: this.get_proxy( url ), data: { agent: this.useragent }, accepts: 'json', dataType: 'json'
         })
             .done(function( result ) {
                 if(result['headers'] && result['body'] && result['body'].toLowerCase().indexOf('<head') >= 0) {
-                    var html = $(crawler.strip_img_src(result['body']));
-                    crawler.trigger('CRAWL_BEFORE_TESTS', [url]);
-                    crawler.fetch_links(html);
-                    crawler.run_tests(url, html, result['headers'], result['field_data'], result['phrases']);
-                    crawler.trigger('CRAWL_AFTER_TESTS', [url]);
-                }else{
-                    crawler.trigger('CRAWL_LOAD_FAILED', [url]);
+                    if( !crawler.is_external(result['url_fetched']) ) {
+                        url = crawler.sanitize(result['url_fetched']);
+                        if(crawler.tested.indexOf(url) >= 0){
+                            this.skipped = true;
+                            return true;
+                        }
+
+                        var html = $(crawler.strip_img_src(result['body']));
+                        crawler.trigger('CRAWL_BEFORE_TESTS', [url]);
+                        crawler.fetch_links(html, url);
+                        crawler.run_tests(url, html, result['headers'], result['field_data'], result['phrases']);
+                        crawler.trigger('CRAWL_AFTER_TESTS', [url]);
+                        return true;
+                    }
                 }
+                crawler.trigger('CRAWL_LOAD_FAILED', [url]);
             })
-            .fail( function(){ crawler.trigger('CRAWL_LOAD_FAILED', [url]) })
-            .always( function(){ crawler.trigger('CRAWL_FINISHED', [url]) });
+            .fail( function(){ crawler.trigger('CRAWL_LOAD_FAILED', [url]); })
+            .always( function(){
+                crawler.trigger('CRAWL_FINISHED', [url]);
+                if((this.hasOwnProperty('skipped') && this.skipped) || crawler.tested.indexOf(url) < 0 )
+                    crawler.tested.push(url)
+            });
     },
 
     /**
      * Check for links in the html of the rendered page so we add them to the que
+     * and also map how pages are linked to each other
      *
      * @param {jQuery} html
+     * @param {string} url
      */
-    fetch_links: function(html){
-        $.each(html.find('a'), function(){ crawler.que_url( $(this).attr('href') ); });
+    fetch_links: function(html, url){
+        $.each(html.find('a'), function(){
+            var href    = $(this).attr('href'),
+                link    = crawler.sanitize(href);
+
+            crawler.que_url( href );
+
+            if(!crawler.linked_from.hasOwnProperty(link)) crawler.linked_from[link] = [url];
+            else if( crawler.linked_from[link].indexOf(url) < 0 ) crawler.linked_from[link].push(url);
+        });
     },
 
     /**
@@ -362,10 +398,22 @@ const crawler_painter = {
             $this.addClass(css);
         });
 
-        // #TODO: Export Button
         export_button.click(function(){
             crawler.trigger('BEFORE_EXPORT', [name]);
-            // Export
+            var $this       = $(this),
+                rows        = $this.parents( '.infobox' ).first().find( 'table tr' ),
+                csvContent  = "data:text/csv;charset=utf-8,";
+
+            $.each( rows, function(){
+                var item = [];
+                $.each( $(this).find( 'th, td' ), function(){ item.push( $(this).text() ); });
+                csvContent += item.join(',') + "\n";
+            });
+
+            var link = document.createElement( 'a' );
+            link.setAttribute( 'href', encodeURI( csvContent ) );
+            link.setAttribute( 'download', name + '.csv' );
+            link.click();
             crawler.trigger('AFTER_EXPORT', [name]);
         });
 
@@ -410,7 +458,13 @@ const crawler_painter = {
      * @param {string|undefined} type
      */
     reset_table: function(name, type){
-        this.get_container_by_name(name).find('tbody tr').remove();
+        var cont = this.get_container_by_name(name);
+
+        cont.find('tbody tr').remove();
+        cont.find('.count').html('');
+        cont.find('.icon.export').hide();
+        cont.find('.icon.toggle').hide();
+
         if( type != undefined ) this.set_type(name, type);
     },
 
@@ -494,8 +548,10 @@ const crawler_painter = {
      */
     create_link: function(url, anchor){
         anchor = (anchor) ? anchor : url;
-        return '<a class="btn btn-link" href="'+url+'" target="_blank" rel="nofollow">'
-                +'<span class="glyphicon glyphicon-new-window">&nbsp;</span>'+anchor+'</a>';
+        return '<a class="btn btn-link" href="'+url+'" title="'+anchor+'" target="_blank" rel="nofollow">'
+                +'<span class="glyphicon glyphicon-new-window">&nbsp;</span>'+
+                ((anchor.length > 29) ? anchor.substr(0, 27) + '...' : anchor)
+                +'</a>';
     },
 
     /**

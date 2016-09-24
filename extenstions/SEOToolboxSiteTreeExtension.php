@@ -13,8 +13,8 @@ class SEOToolboxSiteTreeExtension extends DataExtension{
         return $tags;
     }
 
-    // #TODO: Combine Desktop and mobile into a single tab so that the keyword box only needs to be filled in once
     public function updateCMSFields(FieldList $fields){
+        $fields->removeByName('Metadata');
         $fields->addFieldsToTab('Root.SEO', array(
             TextField::create("MetaTitle",
                 _t('SEOToolbox.SEOMetaTitle', 'Meta title')

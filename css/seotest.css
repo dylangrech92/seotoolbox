@@ -30,4 +30,4 @@ body,html{background: #222a2d;font-family:'Lato';}
 .infobox.yellow .header, .infobox.yellow thead{background:#caa12e}
 .infobox.yellow .header .count{background:#927420}
 .infobox .status-text{padding:2px 10px;float:left;margin:0}
-.infobox .table td{vertical-align:middle}
+.infobox .table td{vertical-align:middle;word-wrap: break-word;word-break: break-all;min-width: 150px;}
