@@ -126,18 +126,18 @@ that explains how each automated link is affecting your pages.
 
  ---
  
- ### License
+### License
  This plugin is licensed under:
  [GNU GENERAL PUBLIC LICENSE Version 3 (GPL V3)](https://github.com/dylangrech92/seotoolbox/blob/master/license/license.txt)
  
  ---
  
- ### Contributing
+### Contributing
  Have ideas? Pitch them first before starting any work as I might have started working on your idea already :)
  
  ---
  
- ### Planned Features
+### Planned Features
  - Options to add custom filters to crawler
  - Structured data automatic markup and validation tester
  - OpenGraph and Twitter tags
