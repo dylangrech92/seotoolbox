@@ -20,6 +20,8 @@ class SEOToolboxControllerExtension extends Extension{
     private $maxLinks       = 0;
 	
 	public function index(){
+        $this->addAutomatedLinks();
+
 	    // If we have a crawl request check the CrawlID so we're sure we didn't hit another SS site running our module
 	    if( $crawl_id = $this->owner->request->getHeader('X-Crawl-Id') ){
 	        return( $crawl_id == GlobalAutoLinkSettings::get_current()->CrawlID )
@@ -27,7 +29,6 @@ class SEOToolboxControllerExtension extends Extension{
                 : $this->owner->redirect(SEOTestSiteTreeController::getPermissionDeniedPage()->Link());
         }
 
-		$this->addAutomatedLinks();
 		return array();
 	}
 
