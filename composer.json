@@ -16,7 +16,7 @@
     "silverstripe/cms": ">= 3.0",
     "silverstripe/framework": ">= 3.0",
     "UndefinedOffset/SortableGridField": ">= 0.6.0",
-    "silverstripe/silverstripe-html5": ">= 1.0.1"
+    "silverstripe/html5": ">= 1.0.4"
   },
   "extra": {
     "installer-name": "seotoolbox",
