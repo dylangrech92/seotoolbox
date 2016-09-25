@@ -1,3 +1,8 @@
+/**
+ * global: crawler
+ * global: default_tests
+ * global: crawler_painter
+ */
 (function($){
     $.ajax({
         url	        : '/seotest/urlsAndSettings',
@@ -17,7 +22,7 @@
                 }
 
                 // Que initial urls
-                for( var i in result['urls'] ) crawler.que_url(result['urls'][i]);
+                for( var j in result['urls'] ) crawler.que_url(result['urls'][j]);
 
                 crawler.init(result['settings']);
 

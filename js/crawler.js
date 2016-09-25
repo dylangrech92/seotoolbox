@@ -1,3 +1,7 @@
+/**
+ * global: crawler
+ * global: crawler_painter
+ */
 const crawler = {
 
     que             : [],
@@ -17,7 +21,7 @@ const crawler = {
      * @param {string} title
      * @param {Array} headers
      * @param {string} callable
-     * @returns {boolean}
+     * @returns {undefined}
      * @throws Exception
      */
     regiser_test: function(name, title, headers, callable){
@@ -26,6 +30,7 @@ const crawler = {
         if(!(headers instanceof Array) || headers.length < 1) throw 'Headers array is invalid';
         if(typeof callable != 'function') return crawler_painter.create(name, title, headers);
         this.tests.push({name: name, title: title, callback: callable, cont:crawler_painter.create(name, title, headers)});
+        return undefined;
     },
 
     /**

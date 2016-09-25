@@ -242,4 +242,29 @@ class AutomatedLink extends DataObject implements PermissionProvider {
     public function canBeAdded( ContentController $controller ){
         return ( $this->SelfLinking || $controller->ID != $this->PageID );
     }
+
+    /**
+     * Turn the string passed into a DOMDocument object
+     *
+     * @param string $html
+     * @return DOMDocument
+     */
+    public static function constructDOMDocument($html){
+        if( class_exists( 'HTML5_Parser' ) ){
+            $html5 = HTML5_Parser::parse( $html );
+            if($html5 instanceof DOMNodeList){
+                $dom = new DOMDocument();
+                while($html5->length > 0) {
+                    $dom->appendChild($html5->item(0));
+                }
+            }else{
+                $dom = $html5;
+            }
+        } else{
+            $dom = new DOMDocument();
+            $dom->loadHTML( $html );
+        }
+
+        return $dom;
+    }
 }

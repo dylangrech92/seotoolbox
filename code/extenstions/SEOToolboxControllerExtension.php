@@ -106,21 +106,7 @@ class SEOToolboxControllerExtension extends Extension {
                     $dummy->setValue( $this->owner->$field );
                     // Create DOMDocument Object
                     $content = mb_convert_encoding( $dummy->forTemplate(), 'html-entities', GlobalAutoLinkSettings::$encoding );
-
-                    if( class_exists( 'HTML5_Parser' ) ){
-                        $html5 = HTML5_Parser::parse( $content );
-                        if($html5 instanceof DOMNodeList){
-                            $dom = new DOMDocument();
-                            while($html5->length > 0) {
-                                $dom->appendChild($html5->item(0));
-                            }
-                        }else{
-                            $dom = $html5;
-                        }
-                    } else{
-                        $dom = new DOMDocument();
-                        $dom->loadHTML( $content );
-                    }
+                    $dom = AutomatedLink::constructDOMDocument($content);
 
                     // Check current link count and if it's already exceeded do nothing
                     $this->linkCount += (int) $dom->getElementsByTagName( 'a' )->length;

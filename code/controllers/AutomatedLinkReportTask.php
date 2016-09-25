@@ -149,24 +149,7 @@ class AutomatedLinkReportTask extends Controller {
             GlobalAutoLinkSettings::$encoding
         );
 
-        if (!$content) return false;
-
-        if( class_exists( 'HTML5_Parser' ) ){
-            $html5 = HTML5_Parser::parse( $content );
-            if($html5 instanceof DOMNodeList){
-                $dom = new DOMDocument();
-                while($html5->length > 0) {
-                    $dom->appendChild($html5->item(0));
-                }
-            }else{
-                $dom = $html5;
-            }
-        } else{
-            $dom = new DOMDocument();
-            $dom->loadHTML( $content );
-        }
-
-        return $dom;
+        return (!$content) ? false : AutomatedLink::constructDOMDocument($content);
     }
 
     /**
