@@ -101,8 +101,9 @@ class GlobalAutoLinkSettings extends DataObject{
         if( !$this->AddTo ) return $classes;
 
         $sanitized = explode( ',', str_replace( ' ', '', strtolower( $this->AddTo ) ) );
+        $len       = count($sanitized);
 
-        for( $x = 0; $x < count( $sanitized ); $x++ ){
+        for( $x = 0; $x < $len; $x++ ){
             $found = false;
 
             foreach( $classes as $class ){

@@ -1,8 +1,3 @@
-/**
- * global: crawler
- * global: default_tests
- * global: crawler_painter
- */
 (function($){
     $.ajax({
         url	        : '/seotest/urlsAndSettings',

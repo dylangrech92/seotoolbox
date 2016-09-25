@@ -1,10 +1,3 @@
-/**
- * Example callback:
- * callback: function(cont, url, html, headers, field_data, phrases){
-            return crawler.add_row('h1count', html.find( 'h1' ).length);
-        }
- *
- */
 const default_tests = [
     {
         name: 'error_pages',
@@ -20,7 +13,8 @@ const default_tests = [
         callback: function(cont, url, html){
             var h1      = html.find( 'h1' ),
                 link    = crawler_painter.create_link(url, url),
-                joined  = [], status  = undefined;
+                joined  = [],
+                status;
 
             h1.each(function(){ joined.push(this.innerHTML); });
 
@@ -29,6 +23,8 @@ const default_tests = [
             else status = crawler_painter.create_status('success', 'OK!');
 
             crawler_painter.add_row(this.name, [link, h1.length, joined.join(', '), status]);
+
+            return true;
         }
     },
 
@@ -47,6 +43,8 @@ const default_tests = [
             else status = crawler_painter.create_status('success', 'OK!');
 
             crawler_painter.add_row(this.name, [link, h2.length, joined.join(', '), status]);
+
+            return true;
         }
     },
 
@@ -60,6 +58,8 @@ const default_tests = [
                 art_count   = crawler.get_word_count(field_data[3]);
 
             crawler_painter.add_row(this.name, [link, word_count, art_count]);
+
+            return true;
         }
     },
 
@@ -93,7 +93,7 @@ const default_tests = [
                 word_count      = crawler.get_word_count(phrases),
                 density         = (links.length > 0) ? word_count / links.length : false,
                 dens_text       = (density != false) ? density.toFixed(2) +' words/link' : 'No internal links',
-                status          = undefined;
+                status;
 
             if( ( art_density !== false && art_density < 100 ) )
                 status = crawler_painter.create_status('warning', 'This page might be considered spammy');
@@ -102,6 +102,8 @@ const default_tests = [
                 crawler_painter.add_row( this.name, [
                     link, art_links.join('<br />'), art_links.length, art_dens_text, links.length, dens_text, status
                 ]);
+
+            return true;
         }
     },
 
@@ -132,6 +134,8 @@ const default_tests = [
             }
 
             if(links.length > 0) crawler_painter.add_row(this.name, [link, links.length, links]);
+
+            return true;
         }
     },
 
@@ -169,6 +173,8 @@ const default_tests = [
                 status = crawler_painter.create_status('success', 'OK!');
 
             crawler_painter.add_row(this.name, [link, imgs.length, alt, title, fields.join(', '), status]);
+
+            return true;
         }
     },
 
@@ -199,6 +205,8 @@ const default_tests = [
             if(!crawler.hasOwnProperty('meta_titles')) crawler.meta_titles = {};
             if(!crawler.meta_titles.hasOwnProperty(text)) crawler.meta_titles[text] = [url];
             else crawler.meta_titles[text].push(url);
+
+            return true;
         }
     },
 
@@ -209,7 +217,7 @@ const default_tests = [
         callback: function(cont, url, html){
             var desc = html.filter( 'meta[name=description]' ),
                 link  = crawler_painter.create_link(url, url),
-                text  = '', len = 0, status = undefined;
+                text  = '', len = 0, status;
 
             if( desc.length > 1 ){
                 text = 'Multiple Meta Descriptions';
@@ -230,6 +238,8 @@ const default_tests = [
             }
 
             crawler_painter.add_row(this.name, [link, text, len, status]);
+
+            return true;
         }
     },
 
@@ -259,6 +269,8 @@ const default_tests = [
             if(!crawler.hasOwnProperty('canonicals')) crawler.canonicals = {};
             if(!crawler.canonicals.hasOwnProperty(canonical)) crawler.canonicals[canonical] = [url];
             else crawler.canonicals[canonical].push(url);
+
+            return true;
         }
     },
 
@@ -276,6 +288,8 @@ const default_tests = [
                     crawler_painter.set_type(this.name, 'warning');
                     return;
                 }
+
+            return true;
         }
     },
 
@@ -295,6 +309,8 @@ const default_tests = [
             else return true;
 
             crawler_painter.add_row(this.name, [link, crawler_painter.create_status(type, msg)]);
+
+            return true;
         }
     },
 
@@ -332,6 +348,8 @@ const default_tests = [
             function getKeyFromObject(object, search){
                 for( var key in object ) if( object[key].indexOf(search) >= 0 ) return key;
             }
+
+            return true;
         }
     },
 
@@ -350,6 +368,8 @@ const default_tests = [
             });
 
             if( tags.length > 0 ) crawler_painter.add_row(this.name, [link, tags.join('<br />')] );
+
+            return true;
         }
     },
 
@@ -372,6 +392,8 @@ const default_tests = [
                 crawler.add_row(this.name, [crawler_painter.create_link(crawler.tested[i], crawler.tested[i])]);
                 crawler_painter.set_type(this.name, 'error');
             }
+
+            return true;
         }
     }
 ];

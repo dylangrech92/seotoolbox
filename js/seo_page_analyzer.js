@@ -87,7 +87,9 @@ function PageAnalyzer(cont, url){
             text_box    = $('<input type="text" class="text" />').appendTo(middle_col),
             analyze_btn = $('<button class="ss-ui-button ss-ui-button-medium">Analyze</button>').appendTo(middle_col);
 
-        analyze_btn.click(function(){
+        analyze_btn.click(function(e){
+            e.preventDefault();
+
             if( self.data['desktop'] === undefined || self.data['mobile'] === undefined ) return true;
 
             $('.keyword_result').remove();
@@ -113,6 +115,8 @@ function PageAnalyzer(cont, url){
 
                 self.cont.append(layout);
             }
+
+            return false;
         });
 
         return keyword_box;
@@ -158,7 +162,7 @@ function PageAnalyzer(cont, url){
 
 // Add a case insensitive version of the contains function
 jQuery.extend(jQuery.expr[':'], {
-    'containsi': function(elem, i, match, array){
+    'containsi': function(elem, i, match){
         return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
     }
 });

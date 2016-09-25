@@ -1,7 +1,3 @@
-/**
- * global: crawler
- * global: crawler_painter
- */
 const crawler = {
 
     que             : [],
@@ -48,15 +44,16 @@ const crawler = {
      * Check if the url passed is valid for crawling, if so and it hasn't
      * been added or crawled before, add it to the que
      *
-     * Returns false if failed to add to que
+     * Returns true|false if added to que
      *
      * @param {string} url
-     * @returns {boolean|undefined}
+     * @returns {boolean}
      */
     que_url: function(url){
         var sanitized = this.sanitize(url);
         if( !this.can_crawl(url) || this.que.indexOf(sanitized) > -1 || !this.can_crawl(sanitized)) return false;
         this.que.push(sanitized);
+        return true;
     },
 
     /**
@@ -225,11 +222,13 @@ const crawler = {
                 }
                 crawler.trigger('CRAWL_LOAD_FAILED', [url]);
             })
-            .fail( function(){ crawler.trigger('CRAWL_LOAD_FAILED', [url]); })
+            .fail( function(){ return crawler.trigger('CRAWL_LOAD_FAILED', [url]); })
             .always( function(){
                 crawler.trigger('CRAWL_FINISHED', [url]);
-                if((this.hasOwnProperty('skipped') && this.skipped) || crawler.tested.indexOf(url) < 0 )
+                if((this.hasOwnProperty('skipped') && this.skipped) || crawler.tested.indexOf(url) < 0 ) {
                     crawler.tested.push(url)
+                }
+                return true;
             });
     },
 
@@ -476,8 +475,9 @@ const crawler_painter = {
     /**
      * Create a status field to be used in the report rows
      *
-     * @param string type
-     * @param string text
+     * @param {string} type
+     * @param {string} text
+     * @return {jQuery}
      */
     create_status: function(type, text){
         var ret = $('<div class="status-text alert"></div>');
@@ -501,6 +501,7 @@ const crawler_painter = {
                 ret.addClass('alert-warning');
                 ret.append('<i class="glyphicon glyphicon-warning-sign">&nbsp;</i>');
                 break;
+            default: return undefined;
         }
         ret.append(text);
         return ret;
@@ -510,7 +511,7 @@ const crawler_painter = {
      * Return the container matching the provided name
      *
      * @param {string} name
-     * @returns {jQuery}
+     * @return {jQuery}
      */
     get_container_by_name: function(name){
         for(var c in this.containers) if(this.containers[c]['name'] == name) return this.containers[c]['container'];
