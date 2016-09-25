@@ -4,21 +4,34 @@
  * Author: Dylan Grech
  * Copyright: 2016
  * License: Open GPL License V3.0
- * 
+ *
  * SEOtoolbox Controller Extension decorates the Content Controller
  * to add the auotamted links to a page where needed
  *
  * @see AutomatedLink
  */
 class SEOToolboxControllerExtension extends Extension{
-	
+
+    /**
+     * In here we can perform actions before the here mentioned $field
+     * text is parsed and where possible links are created.
+     *
+     * $html is DOMDocument object of the field mentioned
+     *
+     * @param DOMDocument $html
+     * @param             $field
+     */
+    public function beforeParseField(DOMDocument $html, $field){
+        // Do something here
+    }
+
 	private $maxLinksPerPage;
     private $settings       = null;
 	private $linkCount      = 0;
     private $addLinks       = true;
     private $excludeTags    = array();
     private $maxLinks       = 0;
-	
+
 	public function index(){
         $this->addAutomatedLinks();
 
@@ -84,7 +97,7 @@ class SEOToolboxControllerExtension extends Extension{
 	/**
 	 * Goes through all the automated link settings and adds
 	 * the links where necessary
-	 * 
+	 *
 	 * @return void
 	 */
 	public function addAutomatedLinks(){
@@ -123,7 +136,7 @@ class SEOToolboxControllerExtension extends Extension{
 
 	/**
 	 * Parse the provided field and add the necessary links
-	 * 
+	 *
 	 * @param DOMDocument $html
      * @param String $field
 	 * @return string
@@ -149,7 +162,7 @@ class SEOToolboxControllerExtension extends Extension{
 
         $body    = (string)$html->saveHTML( $html->getElementsByTagName('body')->item(0) );
         $content = preg_replace( array( '/\<body\>/is', '/\<\/body\>/is' ), '', $body, 1 );
-        
+
 		// Create the links
 		$links = AutomatedLink::get()->sort('Priority');
 		foreach( $links as $link ){
@@ -159,7 +172,7 @@ class SEOToolboxControllerExtension extends Extension{
 			$max    = (int) ( $link->MaxLinksPerPage > 0 ) ? $link->MaxLinksPerPage : PHP_INT_MAX;
             $escape = (string) preg_quote( $link->Phrase, '/' );
 			$regex  = (string) ( $link->CaseSensitive ) ? "/(\b{$escape}\b)/" : "/(\b{$escape}\b)/i";
-            
+
             // Count the matches
             preg_match_all( $regex, $content, $count );
             $count = ( is_array( $count ) && isset( $count[0] ) ) ? count( $count[0] ) : 0;
@@ -169,7 +182,7 @@ class SEOToolboxControllerExtension extends Extension{
 				$max -= $this->maxLinksPerPage[ $link->ID ];
 			else
 				$this->maxLinksPerPage[ $link->ID ] = 0;
-            
+
 			for( $x = 0; $x < $count; $x++ ){
 				// Stop adding links if we reached the link or page limit
 				if( $x >= $max || $this->linkCount >= $this->maxLinks ) break;
@@ -186,11 +199,11 @@ class SEOToolboxControllerExtension extends Extension{
 				$this->linkCount++;
                 $this->maxLinksPerPage[ $link->ID ]++;
             }
-			
+
 			// Stop Adding links if we reached the page limit
 			if( $this->linkCount >= $this->maxLinks ) break;
 		}
-		
+
 		// Re-add the excluded Tags
 		$content = str_replace( array_keys( $excluded ), array_values( $excluded ), $content );
 

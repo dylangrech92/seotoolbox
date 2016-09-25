@@ -4,29 +4,28 @@
   "type": "silverstripe-module",
   "homepage": "https://github.com/dylangrech92/seotoolbox",
   "keywords": ["silverstripe", "seo", "toolbox", "automated links", "seo", "reporting", "seo testing"],
-  "license": "GPL V3",
+  "license": "BSD-3-Clause",
   "authors": [
-    {"name": "Dylan Grech","email": "dylangrech92@gmail.com"}
+    { "name": "Dylan Grech",
+      "email": "dylangrech92@gmail.com",
+      "homepage": "https://innovativecodes.com/websites-marketing-and-more/dylan-grech",
+      "role": "Developer"
+    }
   ],
   "support": {
-    "issues": "https://github.com/dylangrech92/seotoolbox/issues"
+    "issues": "https://github.com/dylangrech92/seotoolbox/issues",
+    "email": "dylangrech92@gmail.com",
+    "docs": "https://github.com/dylangrech92/seotoolbox/tree/master/docs",
+    "source": "https://github.com/dylangrech92/seotoolbox"
   },
   "require": {
-    "php": ">=5.3.0",
-    "silverstripe/cms": ">= 3.0",
-    "silverstripe/framework": ">= 3.0",
-    "UndefinedOffset/SortableGridField": ">= 0.6.0",
-    "silverstripe/html5": ">= 1.0.4"
+    "php": "^5.3.0",
+    "silverstripe/cms": "^3.2",
+    "silverstripe/framework": "^3.2",
+    "UndefinedOffset/SortableGridField": "^0.6.2",
+    "silverstripe/html5": "^1.0.4"
   },
   "extra": {
-    "installer-name": "seotoolbox",
-    "screenshots": [
-      "https://raw.githubusercontent.com/dylangrech92/seotoolbox/master/images/seotoolbox_add_link.png",
-      "https://raw.githubusercontent.com/dylangrech92/seotoolbox/master/images/seotoolbox_global_settings.png",
-      "https://raw.githubusercontent.com/dylangrech92/seotoolbox/master/images/seotoolbox_crawler_options.png",
-      "https://raw.githubusercontent.com/dylangrech92/seotoolbox/master/images/seotoolbox_crawl_1.png",
-      "https://raw.githubusercontent.com/dylangrech92/seotoolbox/master/images/seotoolbox_crawl_2.png",
-      "https://raw.githubusercontent.com/dylangrech92/seotoolbox/master/images/seotoolbox_onpage_analysis.png"
-    ]
+    "installer-name": "seotoolbox"
   }
 }
