@@ -1,14 +1,14 @@
 <?php
 
-class AutomatedLinkReportTask extends Controller{
+class AutomatedLinkReportTask extends Controller {
 
     private   $GlobalSettings;
     private   $Links;
 
-    private static $exclude_classes = array( 'RedirectorPage', 'VirtualPage' );
+    private static $exclude_classes = array('RedirectorPage', 'VirtualPage');
 
-    public function index(){
-        if( !Director::is_cli() ) return 'Please run this controller in CLI';
+    public function index() {
+        if (!Director::is_cli()) return 'Please run this controller in CLI';
 
         libxml_use_internal_errors(true);
         set_time_limit(600);
@@ -25,34 +25,34 @@ class AutomatedLinkReportTask extends Controller{
      * @see AutomatedLinkPageResult
      * @return ArrayList
      */
-    public function checkLinks(){
+    public function checkLinks() {
         $data = ArrayList::create();
 
-        $run_in_realtime = Config::inst()->get( 'AutomatedLinkReport', 'run_in_realtime' );
+        $run_in_realtime = Config::inst()->get('AutomatedLinkReport', 'run_in_realtime');
 
         // Enable this since we will need to render the pages for the report
         Config::inst()->update('SSViewer', 'theme_enabled', true);
         
         $this->GlobalSettings = GlobalAutoLinkSettings::get_current();
-        $this->Links          = AutomatedLink::get()->sort( 'Priority' );
+        $this->Links          = AutomatedLink::get()->sort('Priority');
         $includeInFields      = $this->GlobalSettings->IncludeInFields();
-        if( !$this->GlobalSettings ){
-            user_error( 'Run dev/build before starting to use SEOToolbox' );
+        if (!$this->GlobalSettings) {
+            user_error('Run dev/build before starting to use SEOToolbox');
             return $data;
         }
 
-        $exclude = Config::inst()->get( $this->class, 'exclude_classes' );
-        $exclude = ( $exclude ) ? "'".implode( "','", $exclude )."'" : '';
-        foreach( SiteTree::get()->where( "ClassName NOT IN($exclude)" ) as $page ){
-            if( !$this->checkForPossibleLinks( $page, $includeInFields ) ) continue;
-            $page = $this->getLinkData( $page, $includeInFields );
-            if( !$page ) continue;
+        $exclude = Config::inst()->get($this->class, 'exclude_classes');
+        $exclude = ($exclude) ? "'".implode("','", $exclude)."'" : '';
+        foreach (SiteTree::get()->where("ClassName NOT IN($exclude)") as $page) {
+            if (!$this->checkForPossibleLinks($page, $includeInFields)) continue;
+            $page = $this->getLinkData($page, $includeInFields);
+            if (!$page) continue;
 
-            if( !$run_in_realtime ) AutomatedLinkPageResult::add_or_update( $page );
-            $data->push( $page );
+            if (!$run_in_realtime) AutomatedLinkPageResult::add_or_update($page);
+            $data->push($page);
         }
 
-        if( !$run_in_realtime ) AutomatedLinkPageResult::remove_old_data();
+        if (!$run_in_realtime) AutomatedLinkPageResult::remove_old_data();
 
         return $data;
     }
@@ -66,19 +66,19 @@ class AutomatedLinkReportTask extends Controller{
      *
      * @return SiteTree $page
      */
-    private function getLinkData( SiteTree $page, array $includeIn ){
+    private function getLinkData(SiteTree $page, array $includeIn) {
         // Set a list of all fields that can have autolinks created in them
         $page->AutomateableFields = ArrayList::create();
 
-        foreach( $this->getAllDatabaseFields( $page->class ) as $field => $type )
-            if( in_array( $field, $includeIn )                          &&
-                !$page->AutomateableFields->find( 'DataField', $field ) &&
-                AutomatedLink::isFieldParsable( $page, $field )
-            ) $page->AutomateableFields->push( DataObject::create( array( 'DataField' => $field ) ) );
+        foreach ($this->getAllDatabaseFields($page->class) as $field => $type)
+            if (in_array($field, $includeIn) &&
+                !$page->AutomateableFields->find('DataField', $field) &&
+                AutomatedLink::isFieldParsable($page, $field)
+            ) $page->AutomateableFields->push(DataObject::create(array('DataField' => $field)));
 
         // Get data Pre-Automated Links creation
-        $withLinks = $this->getPageDOM( $page, true );
-        if( !$withLinks ) return false;
+        $withLinks = $this->getPageDOM($page, true);
+        if (!$withLinks) return false;
 
         $links = $withLinks->getElementsByTagName('a');
 
@@ -88,18 +88,18 @@ class AutomatedLinkReportTask extends Controller{
 
         // List all automated links that were created in this $page
         $linksUsed = array();
-        foreach( $this->Links as $autolink )
-            foreach( $links as $link ){
-                if( $link->getAttribute('data-id') == $autolink->ID ){
+        foreach ($this->Links as $autolink)
+            foreach ($links as $link) {
+                if ($link->getAttribute('data-id') == $autolink->ID) {
                     $linksUsed[$autolink->ID] = $autolink->Phrase;
                     $page->OriginalLinkCount--;
                     $page->LinkCount++;
                 }
             }
 
-        $page->Links = implode( ', ', $linksUsed );
+        $page->Links = implode(', ', $linksUsed);
 
-        if( $page->LinkCount < 1 ) return false;
+        if ($page->LinkCount < 1) return false;
 
         return $page;
     }
@@ -111,10 +111,10 @@ class AutomatedLinkReportTask extends Controller{
      * @param String $class
      * @return array
      */
-    private function getAllDatabaseFields( $class ){
+    private function getAllDatabaseFields($class) {
         $fields = array();
-        foreach( ClassInfo::ancestry( $class, true ) as $cls )
-            $fields = array_merge( $fields, (array) DataObject::database_fields( $cls ) );
+        foreach (ClassInfo::ancestry($class, true) as $cls)
+            $fields = array_merge($fields, (array) DataObject::database_fields($cls));
 
         return $fields;
     }
@@ -128,35 +128,35 @@ class AutomatedLinkReportTask extends Controller{
      *
      * @return DOMDocument | false
      */
-    private function getPageDOM( SiteTree $page ){
+    private function getPageDOM(SiteTree $page) {
         $controllerClass = $page->class.'_Controller';
-        if( !class_exists( $controllerClass ) )  $controller = $page->class.'Controller';
-        if( !class_exists( $controllerClass  ) ) return false;
+        if (!class_exists($controllerClass))  $controller = $page->class.'Controller';
+        if (!class_exists($controllerClass)) return false;
 
-        $controller = $controllerClass::create( $page );
-        $controller->invokeWithExtensions( 'addAutomatedLinks' );
+        $controller = $controllerClass::create($page);
+        $controller->invokeWithExtensions('addAutomatedLinks');
 
         // Set the fields with possible links into a single variable that
         // will be dumped in the link checker template
         $page->AutomateableText = '';
-        foreach( $page->AutomateableFields as $field ){
+        foreach ($page->AutomateableFields as $field) {
             $field = $field->DataField;
             $page->AutomateableText .= $page->$field;
         }
 
         $content = mb_convert_encoding(
-            $controller->renderWith( 'LinkCheckerTemplate' ),
+            $controller->renderWith('LinkCheckerTemplate'),
             'html-entities',
             GlobalAutoLinkSettings::$encoding
         );
 
-        if( !$content ) return false;
+        if (!$content) return false;
 
-        if( class_exists( 'HTML5_Parser' ) ){
+        if (class_exists('HTML5_Parser')) {
             $dom = HTML5_Parser::parse($content);
-        }else{
+        }else {
             $dom = new DOMDocument();
-            $dom->loadHTML( $content );
+            $dom->loadHTML($content);
         }
 
         return $dom;
@@ -170,10 +170,10 @@ class AutomatedLinkReportTask extends Controller{
      *
      * @return Boolean
      */
-    private function checkForPossibleLinks( SiteTree $page, array $includeIn ){
-        foreach( $this->Links as $link )
-            foreach( $includeIn as $possibleField )
-                if( isset( $page->$possibleField ) && preg_match( "/\b{$link->Phrase}\b/i", $page->$possibleField ) ) return true;
+    private function checkForPossibleLinks(SiteTree $page, array $includeIn) {
+        foreach ($this->Links as $link)
+            foreach ($includeIn as $possibleField)
+                if (isset($page->$possibleField) && preg_match("/\b{$link->Phrase}\b/i", $page->$possibleField)) return true;
 
         return false;
     }

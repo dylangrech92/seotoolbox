@@ -15,11 +15,11 @@ class AutomatedLinkReport extends SS_Report{
     // Configs
     private static $run_in_realtime = true;
 
-    public function Title(){
+    public function Title() {
         return (string) $this->title;
     }
 
-    public function columns(){
+    public function columns() {
         return array(
             'Title'              => array(
                 'title' => 'Page Title',
@@ -52,7 +52,7 @@ class AutomatedLinkReport extends SS_Report{
         $gridConfig->removeComponentsByType('GridFieldPrintButton');
         $gridConfig->removeComponentsByType('GridFieldExportButton');
 
-        $gridConfig->addComponents (
+        $gridConfig->addComponents(
             new GridFieldPrintAllAutomatedLinksButton('buttons-after-left'),
             new GridFieldExportAllAutomatedLinksButton('buttons-after-left')
         );
