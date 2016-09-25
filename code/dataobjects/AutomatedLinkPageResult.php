@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * Class AutomatedLinkPageResult
+ *
+ * This class is used to hold information about a page that has automated links.
+ * It's only created if the controller AutomatedLinkReportTask is run
+ *
+ * @method SiteTree|null Page()
+ * @property int OriginalLinkCount
+ * @property int LinksCreatedCount
+ * @property string Links
+ */
 class AutomatedLinkPageResult extends DataObject {
 
     private static $db = array(
@@ -27,18 +38,38 @@ class AutomatedLinkPageResult extends DataObject {
     public function canDelete($member = null) {return false; }
     public function canCreate($member = null) {return false; }
 
+    /**
+     * Returns the URL of the page we're related to
+     *
+     * @return string
+     */
     public function Title() {
         return $this->Page()->Title;
     }
 
+    /**
+     * Returns the URL of the page we're related to
+     *
+     * @return string
+     */
     public function URLSegment() {
         return $this->Page()->Link();
     }
 
+    /**
+     * Returns the amount of links created on the page we're related to
+     *
+     * @return int
+     */
     public function LinkCount() {
         return $this->LinksCreatedCount;
     }
 
+    /**
+     * Returns the total amount of link the page we're related to has
+     *
+     * @return int
+     */
     public function TotalLinks() {
         return $this->OriginalLinkCount+$this->LinksCreatedCount;
     }

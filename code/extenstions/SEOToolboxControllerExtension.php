@@ -34,16 +34,18 @@ class SEOToolboxControllerExtension extends Extension {
     private function crawl_response(){
         // Encoded version to detect which fields are being used
         $customize = array();
-        foreach( Config::inst()->get($this->owner->ClassName, 'db') as $field => $type ){
-            if( strtolower( $type ) == 'htmltext' ){
-                $data = ($this->owner->hasMethod($field)) ? $this->owner->$field() : $this->owner->$field;
-                if( !$data ) {
-                    continue;
+        $dbFields  = Config::inst()->get($this->owner->ClassName, 'db');
+        if(is_array($dbFields)) {
+            foreach ( $dbFields as $field => $type) {
+                if (strtolower($type) == 'htmltext') {
+                    $data = ($this->owner->hasMethod($field)) ? $this->owner->$field() : $this->owner->$field;
+                    if($data){
+                        $tmp = new HTMLText('tmp');
+                        $tmp->setValue($data);
+                        $data = base64_encode($tmp->forTemplate());
+                        $customize[$field] = "[**[$field]**[$data]**]";
+                    }
                 }
-                $tmp = new HTMLText('tmp');
-                $tmp->setValue($data);
-                $data = base64_encode($tmp->forTemplate());
-                $customize[$field] = "[**[$field]**[$data]**]";
             }
         }
 
@@ -66,7 +68,7 @@ class SEOToolboxControllerExtension extends Extension {
      * Get the global settings and check if we should be adding
      * links to this page
      *
-     * @return GlobalAutoLinkSettings
+     * @return GlobalAutoLinkSettings|false
      */
     private function getSettings() {
         if ($this->settings === null) {
@@ -106,7 +108,15 @@ class SEOToolboxControllerExtension extends Extension {
                     $content = mb_convert_encoding( $dummy->forTemplate(), 'html-entities', GlobalAutoLinkSettings::$encoding );
 
                     if( class_exists( 'HTML5_Parser' ) ){
-                        $dom = HTML5_Parser::parse( $content );
+                        $html5 = HTML5_Parser::parse( $content );
+                        if($html5 instanceof DOMNodeList){
+                            $dom = new DOMDocument();
+                            while($html5->length > 0) {
+                                $dom->appendChild($html5->item(0));
+                            }
+                        }else{
+                            $dom = $html5;
+                        }
                     } else{
                         $dom = new DOMDocument();
                         $dom->loadHTML( $content );

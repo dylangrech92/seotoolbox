@@ -4,6 +4,7 @@ checks:
 filter:
     excluded_paths:
         - '*.min.js'
+        - "third-party/"
 coding_style:
     php:
         spaces:

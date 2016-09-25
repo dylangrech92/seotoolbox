@@ -6,6 +6,8 @@
  *
  * Automated Link is a dataobject that contains all the data
  * about a link that should be created automatically to a page
+ *
+ * @method SiteTree|null Page()
  */
 class AutomatedLink extends DataObject implements PermissionProvider {
 
@@ -37,14 +39,29 @@ class AutomatedLink extends DataObject implements PermissionProvider {
     private static $plural_name	      = 'Automated Links';
     private static $parsableFields    = array();
 
+    /**
+     * Get the url of the page linked to this object
+     *
+     * @return string
+     */
     public function PointsTo(){
         return $this->Page()->Link();
     }
 
+    /**
+     * Return the phrase set for this object
+     *
+     * @return string
+     */
     public function Title(){
         return $this->Phrase;
     }
 
+    /**
+     * Return the rendered version of this object
+     *
+     * @return String
+     */
     public function forTemplate(){
         return $this->getHTML();
     }

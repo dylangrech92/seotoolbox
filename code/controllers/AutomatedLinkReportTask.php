@@ -64,7 +64,7 @@ class AutomatedLinkReportTask extends Controller {
      * @param  SiteTree $page
      * @param  array $includeIn
      *
-     * @return SiteTree $page
+     * @return SiteTree|false $page
      */
     private function getLinkData(SiteTree $page, array $includeIn) {
         // Set a list of all fields that can have autolinks created in them
@@ -125,8 +125,7 @@ class AutomatedLinkReportTask extends Controller {
      * object or false if anything fails.
      *
      * @param SiteTree $page
-     *
-     * @return DOMDocument | false
+     * @return DOMDocument
      */
     private function getPageDOM(SiteTree $page) {
         $controllerClass = $page->class.'_Controller';
@@ -152,11 +151,19 @@ class AutomatedLinkReportTask extends Controller {
 
         if (!$content) return false;
 
-        if (class_exists('HTML5_Parser')) {
-            $dom = HTML5_Parser::parse($content);
-        }else {
+        if( class_exists( 'HTML5_Parser' ) ){
+            $html5 = HTML5_Parser::parse( $content );
+            if($html5 instanceof DOMNodeList){
+                $dom = new DOMDocument();
+                while($html5->length > 0) {
+                    $dom->appendChild($html5->item(0));
+                }
+            }else{
+                $dom = $html5;
+            }
+        } else{
             $dom = new DOMDocument();
-            $dom->loadHTML($content);
+            $dom->loadHTML( $content );
         }
 
         return $dom;
