@@ -198,8 +198,7 @@ class AutomatedLink extends DataObject implements PermissionProvider {
      * Checks if the field is parable
      *
      * @param SiteTree $page
-     * @param String   $fieldName
-     *
+     * @param String   $field
      * @return Boolean
      */
     public static function isFieldParsable(SiteTree $page, $field) {
@@ -221,7 +220,6 @@ class AutomatedLink extends DataObject implements PermissionProvider {
      * page and field
      *
      * @param ContentController $controller
-     *
      * @return Boolean
      */
     public function canBeAdded( ContentController $controller ){

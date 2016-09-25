@@ -31,10 +31,20 @@ class GlobalAutoLinkSettings extends DataObject{
         'IncludeIn'		  => 'Content'
     );
 
+    /**
+     * Return an array of all html tags we'll exclude
+     *
+     * @return array
+     */
 	public function ExcludeTags(){
 		return array_unique( explode( ',', str_replace( ' ', '', $this->ExcludeTags ).',a,img,iframe,video,object' ) );
 	}
 
+    /**
+     * Return an array of where automated links can be created
+     *
+     * @return array
+     */
 	public function IncludeInFields(){
 		return explode( ',', str_replace( ' ', '', $this->IncludeIn ) );
 	}
@@ -45,7 +55,7 @@ class GlobalAutoLinkSettings extends DataObject{
             $obj = self::create(self::$default_create_config);
             $obj->CrawlID = $this->createCrawlID();
             $obj->write();
-            DB::alteration_message("Added default records to $className table","created");
+            DB::alteration_message("Added default Global Auto Link Settings","created");
         } else{
             if(!$hasData->CrawlID){
                 $hasData->CrawlID = $this->createCrawlID();
@@ -56,6 +66,11 @@ class GlobalAutoLinkSettings extends DataObject{
         parent::requireDefaultRecords();
     }
 
+    /**
+     * Create a random CrawlID
+     *
+     * @return string
+     */
     private function createCrawlID() {
         $ret   = '';
         $alpha = 'abcdefghijklm[)0123456789(]nopqrstuvwxyz';

@@ -71,7 +71,13 @@ class SEOTestSiteTreeController extends Controller {
         return json_encode($curl);
     }
 
-    private function extractWords($html, $get_pure_word_count = false) {
+    /**
+     * Break down the $html provided and returns all words that have an SEO significance
+     *
+     * @param string    $html
+     * @return array
+     */
+    private function extractWords($html) {
         mb_internal_encoding('UTF-8');
         $html = preg_replace_callback(
             "/(&#[0-9]+;)/",
@@ -79,11 +85,7 @@ class SEOTestSiteTreeController extends Controller {
             $html
         );
         $html = str_replace(array("\n", "\r"), ' ', mb_strtolower($html));
-
-        if ($get_pure_word_count) return strip_tags($html);
-
         $phrases = array();
-
         $regex_find_replace = array(
             array(
                 'find'      => '/<meta(.*?)name="(.*?)description"(.*?)content="(.*?)"(.*?)[>]/m',
@@ -123,12 +125,16 @@ class SEOTestSiteTreeController extends Controller {
         }
 
         // Remove the empty elements
-        $phrases = array_filter($phrases, function($phrase) {return strlen(trim($phrase)) > 0; });
-        $count = 0;
-        foreach ($phrases as $p) $count += count(explode(' ', $p));
-        return $phrases;
+        return array_filter($phrases, function($phrase) {return strlen(trim($phrase)) > 0; });
     }
 
+    /**
+     * Returns the first batch of urls the crawler will use
+     * and it's settings in json format
+     *
+     * @param SS_HTTPRequest $request
+     * @return string
+     */
     public function urlsAndSettings(SS_HTTPRequest $request) {
         Requirements::clear();
         return json_encode(array(
@@ -146,7 +152,11 @@ class SEOTestSiteTreeController extends Controller {
     }
 
     /**
+     * Parses the data that we got from curling the crawl version of the page
+     * and splits the html fields into an array
+     *
      * @param string $data
+     * @return array
      */
     private function getHTMLFieldsData($data){
         preg_match_all('/\[\*\*\[(.*?)\]\*\*\[(.*?)\]\*\*\]/im', $data, $matches);
@@ -157,6 +167,14 @@ class SEOTestSiteTreeController extends Controller {
         return $matches;
     }
 
+    /**
+     * Curl the passed $url using the X-Crawl-ID header and parse the data
+     * into an array
+     *
+     * @param string        $url
+     * @param (null|string) $agent
+     * @return array
+     */
     public function loadPage($url, $agent=null){
         $crawl_id = GlobalAutoLinkSettings::get_current()->CrawlID;
         $ch = curl_init();

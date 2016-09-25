@@ -11,19 +11,6 @@
  */
 class SEOToolboxControllerExtension extends Extension {
 
-    /**
-     * In here we can perform actions before the here mentioned $field
-     * text is parsed and where possible links are created.
-     *
-     * $html is DOMDocument object of the field mentioned
-     *
-     * @param DOMDocument $html
-     * @param             $field
-     */
-    public function beforeParseField(DOMDocument $html, $field){
-        // Do something here
-    }
-
     private $maxLinksPerPage;
     private $settings       = null;
     private $linkCount      = 0;

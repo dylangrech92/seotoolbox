@@ -32,7 +32,7 @@ class AutomatedLinkReportTask extends Controller {
 
         // Enable this since we will need to render the pages for the report
         Config::inst()->update('SSViewer', 'theme_enabled', true);
-        
+
         $this->GlobalSettings = GlobalAutoLinkSettings::get_current();
         $this->Links          = AutomatedLink::get()->sort('Priority');
         $includeInFields      = $this->GlobalSettings->IncludeInFields();
@@ -163,7 +163,7 @@ class AutomatedLinkReportTask extends Controller {
     }
 
     /**
-     * Checks if the page could have the possibilty of automated links
+     * Checks if the page could have the possibility of automated links
      *
      * @param SiteTree $page
      * @param array $includeIn
