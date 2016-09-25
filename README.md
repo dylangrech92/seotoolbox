@@ -1,6 +1,9 @@
 SEO Toolbox
 =================
 
+[![Build Status](https://scrutinizer-ci.com/g/dylangrech92/seotoolbox/badges/build.png?b=master)](https://scrutinizer-ci.com/g/dylangrech92/seotoolbox/build-status/master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/dylangrech92/seotoolbox/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/dylangrech92/seotoolbox/?branch=master)
+
 This plugin was created to facilitate SEO work. It adds functionality in 3
 different areas:<br />
 1) In the CMS by adding extra functionality to the Site Tree object<br />
