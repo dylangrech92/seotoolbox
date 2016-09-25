@@ -46,7 +46,7 @@ class GlobalAutoLinkSettings extends DataObject{
             $obj->CrawlID = $this->createCrawlID();
             $obj->write();
             DB::alteration_message("Added default records to $className table","created");
-        }else{
+        } else{
             if(!$hasData->CrawlID){
                 $hasData->CrawlID = $this->createCrawlID();
                 $hasData->write();
@@ -56,13 +56,13 @@ class GlobalAutoLinkSettings extends DataObject{
         parent::requireDefaultRecords();
     }
 
-    private function createCrawlID(){
+    private function createCrawlID() {
         $ret   = '';
         $alpha = 'abcdefghijklm[)0123456789(]nopqrstuvwxyz';
         $alpha_len = strlen($alpha);
 
-        while( strlen($ret) < 14)
-            $ret .= ( rand(0,1) == 0 ) ? strtoupper($alpha[rand(0, $alpha_len-1)]) : $alpha[rand(0, $alpha_len-1)];
+        while (strlen($ret) < 14)
+            $ret .= (rand(0, 1) == 0) ? strtoupper($alpha[rand(0, $alpha_len-1)]) : $alpha[rand(0, $alpha_len-1)];
 
         return $ret;
     }
@@ -75,7 +75,7 @@ class GlobalAutoLinkSettings extends DataObject{
      *
      * @return array
      */
-     public function AllowedIn(){
+        public function AllowedIn(){
         $classes = array_values( ClassInfo::subclassesFor( 'SiteTree' ) );
         if( !$this->AddTo ) return $classes;
 
@@ -96,7 +96,7 @@ class GlobalAutoLinkSettings extends DataObject{
         }
 
         return (array) $sanitized;
-     }
+        }
 
     /**
      * Gets the current config
@@ -105,9 +105,9 @@ class GlobalAutoLinkSettings extends DataObject{
      * @throws \ValidationException
      * @throws null
      */
-    public static function get_current(){
+    public static function get_current() {
         $obj = self::get()->first();
-        if( !$obj ){
+        if (!$obj) {
             self::create(self::$default_create_config)->write();
             self::flush_and_destroy_cache();
         }

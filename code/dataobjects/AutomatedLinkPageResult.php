@@ -1,6 +1,6 @@
 <?php
 
-class AutomatedLinkPageResult extends DataObject{
+class AutomatedLinkPageResult extends DataObject {
 
     private static $db = array(
         'OriginalLinkCount' => 'INT',
@@ -22,25 +22,25 @@ class AutomatedLinkPageResult extends DataObject{
     );
 
     // Disable all permissions to this object no one needs to touch it except the code itself
-    public function canView($member = null){return true;}
-    public function canEdit($member = null){return false;}
-    public function canDelete($member = null){return false;}
-    public function canCreate($member = null){return false;}
+    public function canView($member = null) {return true; }
+    public function canEdit($member = null) {return false; }
+    public function canDelete($member = null) {return false; }
+    public function canCreate($member = null) {return false; }
 
-    public function Title(){
+    public function Title() {
         return $this->Page()->Title;
     }
 
-    public function URLSegment(){
+    public function URLSegment() {
         return $this->Page()->Link();
     }
 
-    public function LinkCount(){
+    public function LinkCount() {
         return $this->LinksCreatedCount;
     }
 
-    public function TotalLinks(){
-        return $this->OriginalLinkCount + $this->LinksCreatedCount;
+    public function TotalLinks() {
+        return $this->OriginalLinkCount+$this->LinksCreatedCount;
     }
 
     /**
@@ -50,9 +50,9 @@ class AutomatedLinkPageResult extends DataObject{
      * @param SiteTree $page
      * @return void
      */
-    public static function add_or_update( SiteTree $page ){
-        $obj = self::get()->find( 'PageID', $page->ID );
-        if( !$obj ) $obj = self::create( array( 'PageID' => $page->ID ) );
+    public static function add_or_update(SiteTree $page) {
+        $obj = self::get()->find('PageID', $page->ID);
+        if (!$obj) $obj = self::create(array('PageID' => $page->ID));
 
         $obj->OriginalLinkCount = $page->OriginalLinkCount;
         $obj->LinksCreatedCount = $page->LinkCount;
@@ -67,7 +67,7 @@ class AutomatedLinkPageResult extends DataObject{
      *
      * @return void
      */
-    public static function remove_old_data(){
-        foreach( self::get() as $obj ) if( !SiteTree::get()->byID( $obj->PageID ) ) $obj->delete();
+    public static function remove_old_data() {
+        foreach (self::get() as $obj) if (!SiteTree::get()->byID($obj->PageID)) $obj->delete();
     }
 }

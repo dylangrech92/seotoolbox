@@ -7,47 +7,47 @@
  * Automated Link is a dataobject that contains all the data
  * about a link that should be created automatically to a page
  */
-class AutomatedLink extends DataObject implements PermissionProvider{
+class AutomatedLink extends DataObject implements PermissionProvider {
 
-	private static $db = array(
-		'Phrase'     	  => 'VARCHAR(255)',
-		'TitleTag'   	  => 'VARCHAR(255)',
-		'AnchorTag' 	  => 'VARCHAR(255)',
-		'NewWindow'  	  => 'Boolean',
-		'NoFollow'   	  => 'Boolean',
-		'SelfLinking'     => 'Boolean',
-		'CaseSensitive'   => 'Boolean',
-		'MaxLinksPerPage' => 'INT',
-		'Priority'		  => 'Int'
-	);
+    private static $db = array(
+        'Phrase'     	  => 'VARCHAR(255)',
+        'TitleTag'   	  => 'VARCHAR(255)',
+        'AnchorTag' 	  => 'VARCHAR(255)',
+        'NewWindow'  	  => 'Boolean',
+        'NoFollow'   	  => 'Boolean',
+        'SelfLinking'     => 'Boolean',
+        'CaseSensitive'   => 'Boolean',
+        'MaxLinksPerPage' => 'INT',
+        'Priority'		  => 'Int'
+    );
 
-	private static $defaults = array(
-		'MaxLinksPerPage' => 10
-	);
+    private static $defaults = array(
+        'MaxLinksPerPage' => 10
+    );
 
-	private static $default_sort = 'Priority';
+    private static $default_sort = 'Priority';
 
-	private static $has_one = array(
-		'Page' => 'SiteTree'
-	);
+    private static $has_one = array(
+        'Page' => 'SiteTree'
+    );
 
-	private static $summary_fields    = array( 'Phrase', 'PointsTo' );
-	private static $searchable_fields = array( 'Phrase' );
-	private static $singular_name	  = 'Automated Link';
-	private static $plural_name	      = 'Automated Links';
+    private static $summary_fields    = array( 'Phrase', 'PointsTo' );
+    private static $searchable_fields = array( 'Phrase' );
+    private static $singular_name	  = 'Automated Link';
+    private static $plural_name	      = 'Automated Links';
     private static $parsableFields    = array();
 
     public function PointsTo(){
         return $this->Page()->Link();
     }
 
-	public function Title(){
-		return $this->Phrase;
-	}
+    public function Title(){
+        return $this->Phrase;
+    }
 
-	public function forTemplate(){
-		return $this->getHTML();
-	}
+    public function forTemplate(){
+        return $this->getHTML();
+    }
 
     function canView( $member = false ){
         return Permission::check('AUTOMATEDLINK_VIEW');
@@ -78,7 +78,9 @@ class AutomatedLink extends DataObject implements PermissionProvider{
 		parent::requireDefaultRecords();
 
 		// Update all links to redirector pages during dev/build
-		foreach( self::get() as $link ) $link->CheckAndUpdateDestination( true );
+		foreach( self::get() as $link ) {
+		    $link->CheckAndUpdateDestination( true );
+		}
 	}
 
 	/**
@@ -87,36 +89,36 @@ class AutomatedLink extends DataObject implements PermissionProvider{
      * @param  String $originalPhrase
 	 * @return String
 	 */
-	public function getHTML( $originalPhrase = NULL ){
-		$link     = ( $this->PageID )     ? $this->Page()->Link() 	    : '#';
-		$title    = ( $this->TitleTag )   ? "title='{$this->TitleTag}'" : '';
-		$nofollow = ( $this->NoFollow )   ? 'rel="nofollow"' 		    : '';
-		$newtab   = ( $this->NewWindow )  ? 'target="_blank"' 		    : '';
-        $anchor   = ( $originalPhrase )   ? $originalPhrase             : $this->Phrase;
-		$link     = ( $this->AnchorTag )  ? rtrim( $link, '#' ).'#'.$this->AnchorTag : $link;
+	public function getHTML($originalPhrase = NULL) {
+		$link     = ($this->PageID) ? $this->Page()->Link() : '#';
+		$title    = ($this->TitleTag) ? "title='{$this->TitleTag}'" : '';
+		$nofollow = ($this->NoFollow) ? 'rel="nofollow"' : '';
+		$newtab   = ($this->NewWindow) ? 'target="_blank"' : '';
+        $anchor = ($originalPhrase) ? $originalPhrase : $this->Phrase;
+		$link     = ($this->AnchorTag) ? rtrim($link, '#').'#'.$this->AnchorTag : $link;
 		return "<a href=\"$link\" $title $nofollow $newtab data-id=\"{$this->ID}\">{$anchor}</a>";
 	}
 
-	public function getCMSFields(){
-		$fields = FieldList::create( TabSet::create( 'Root' ) );
+	public function getCMSFields() {
+		$fields = FieldList::create(TabSet::create('Root'));
 
-		$fields->addFieldsToTab( 'Root.LinkSettings', array(
-			TextField::create( 'Phrase', 'Phrase to search for', $this->Phrase, 255 ),
-			TextField::create( 'TitleTag', 'Title Tag', $this->TitleTag, 255 ),
-			TextField::create( 'AnchorTag', 'Anchor Tag(#)', $this->AnchorTag, 255 ),
+		$fields->addFieldsToTab('Root.LinkSettings', array(
+			TextField::create('Phrase', 'Phrase to search for', $this->Phrase, 255),
+			TextField::create('TitleTag', 'Title Tag', $this->TitleTag, 255),
+			TextField::create('AnchorTag', 'Anchor Tag(#)', $this->AnchorTag, 255),
 			FieldGroup::create(
-				CheckboxField::create( 'NoFollow' ),
-				CheckboxField::create( 'NewWindow' ),
-				CheckboxField::create( 'SelfLinking', 'Allow page to link to itself' ),
-				CheckboxField::create( 'CaseSensitive', 'Match the case of the phrase' )
+				CheckboxField::create('NoFollow'),
+				CheckboxField::create('NewWindow'),
+				CheckboxField::create('SelfLinking', 'Allow page to link to itself'),
+				CheckboxField::create('CaseSensitive', 'Match the case of the phrase')
 			),
-			NumericField::create( 'MaxLinksPerPage', 'Maximum amount of this link to be created on a single page( 0 = unlimited )' ),
-			TreeDropdownField::create( 'PageID', 'Page to link to', 'SiteTree' )
-		) );
+			NumericField::create('MaxLinksPerPage', 'Maximum amount of this link to be created on a single page( 0 = unlimited )'),
+			TreeDropdownField::create('PageID', 'Page to link to', 'SiteTree')
+		));
 
 		$settings = GlobalAutoLinkSettings::get_current();
-		if( $settings ){
-			$fields->addFieldsToTab( 'Root.Global', array(
+		if ($settings) {
+			$fields->addFieldsToTab('Root.Global', array(
 				NumericField::create(
 					'Global_MaxLinksPerPage',
 					'Maximum amount of links a single page can have ( 0 = unlimited )',
@@ -136,14 +138,14 @@ class AutomatedLink extends DataObject implements PermissionProvider{
 					'Include Links into these fields ( comma seperated & field must support html injection )',
 					$settings->IncludeIn
 				)
-			) );
+			));
 		}
 
 		return $fields;
 	}
 
-    public function getCMSValidator(){
-        return new RequiredFields( array( 'Phrase', 'PageID' ) );
+    public function getCMSValidator() {
+        return new RequiredFields(array('Phrase', 'PageID'));
     }
 
 	/**
@@ -152,15 +154,15 @@ class AutomatedLink extends DataObject implements PermissionProvider{
 	 *
 	 * @return void
 	 */
-	public function onBeforeWrite(){
+	public function onBeforeWrite() {
 		parent::onBeforeWrite();
 
 		$settings = GlobalAutoLinkSettings::get_current();
-		if( $settings ){
+		if ($settings) {
 
-			foreach( $this->getChangedFields() as $field => $value ){
-				if( strpos( $field, 'Global_' ) === 0 && isset( $value['after'] ) ){
-					$field = str_replace( 'Global_', '', $field );
+			foreach ($this->getChangedFields() as $field => $value) {
+				if (strpos($field, 'Global_') === 0 && isset($value['after'])) {
+					$field = str_replace('Global_', '', $field);
 					$settings->$field = $value['after'];
 				}
 			}
@@ -186,7 +188,9 @@ class AutomatedLink extends DataObject implements PermissionProvider{
 			$this->Page()->LinkToID && $this->Page()->RedirectionType == 'Internal' )
 		{
 			$this->PageID = $this->Page()->LinkToID;
-			if( $write ) $this->write();
+			if( $write ) {
+			    $this->write();
+			}
 		}
 	}
 
@@ -198,15 +202,15 @@ class AutomatedLink extends DataObject implements PermissionProvider{
      *
      * @return Boolean
      */
-    public static function isFieldParsable( SiteTree $page, $field ){
-        if( !isset( self::$parsableFields[$page->ID] ) || !isset( self::$parsableFields[$page->ID][$field] ) ){
+    public static function isFieldParsable(SiteTree $page, $field) {
+        if (!isset(self::$parsableFields[$page->ID]) || !isset(self::$parsableFields[$page->ID][$field])) {
             $fields = array();
 
-            foreach( ClassInfo::ancestry( $page->ClassName, true ) as $class )
-                $fields = array_merge( $fields, (array) DataObject::database_fields( $class ) );
+            foreach (ClassInfo::ancestry($page->ClassName, true) as $class)
+                $fields = array_merge($fields, (array) DataObject::database_fields($class));
 
             self::$parsableFields[$page->ID][$field] =
-                (Boolean) array_key_exists( $field, $fields ) && strtolower( $fields[$field] ) === 'htmltext' && $page->$field;
+                (Boolean) array_key_exists($field, $fields) && strtolower($fields[$field]) === 'htmltext' && $page->$field;
         }
 
         return self::$parsableFields[$page->ID][$field];
@@ -220,7 +224,7 @@ class AutomatedLink extends DataObject implements PermissionProvider{
      *
      * @return Boolean
      */
-	public function canBeAdded( ContentController $controller ){
+    public function canBeAdded( ContentController $controller ){
         return ( $this->SelfLinking || $controller->ID != $this->PageID );
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-class SEOTestSiteTreeController extends Controller{
+class SEOTestSiteTreeController extends Controller {
 
     private static $sprite_path = null;
     private static $css         = null;
@@ -11,34 +11,34 @@ class SEOTestSiteTreeController extends Controller{
     // Array of regex that will be used by the crawler. If the url we're going to crawl matches any filter in here, it will be ignored
     private static $ignore_paths = array();
 
-    private static $allowed_actions = array( 'urlsAndSettings', 'getPageData' );
+    private static $allowed_actions = array('urlsAndSettings', 'getPageData');
 
-    public function init(){
+    public function init() {
         parent::init();
 
         // Check user is logged in and has permission to access to SEO Toolbox Admin
-        if (!Member::currentUser()) return $this->redirect(Security::login_url() . '?BackURL=/seotest');
+        if (!Member::currentUser()) return $this->redirect(Security::login_url().'?BackURL=/seotest');
         if (!Permission::check('CMS_ACCESS_SEOToolboxAdmin')) return $this->redirect(self::getPermissionDeniedPage()->Link());
 
         Requirements::clear();
 
         // Sprite Location needs to be dynamic as devs can install module in different locations
         $sprite_path = $this->config()->get('sprite_path');
-        if ($sprite_path === null) $sprite_path = SEOTOOLBOX_DIR . '/css/icons/icon_sprite.png';
+        if ($sprite_path === null) $sprite_path = SEOTOOLBOX_DIR.'/css/icons/icon_sprite.png';
         Requirements::customCSS(".icon{width:16px;height: 16px;cursor:pointer;background: url(/{$sprite_path});}");
 
         // CSS can be replaced by devs if they desire to change styling
         Requirements::css(SEOTOOLBOX_DIR.'/third-party/bootstrap/css/bootstrap.min.css');
         Requirements::css(SEOTOOLBOX_DIR.'/third-party/bootstrap/css/bootstrap-theme.min.css');
         $css = $this->config()->get('css');
-        if ($css === null) $css = array(SEOTOOLBOX_DIR . '/fonts/lato/lato.css', SEOTOOLBOX_DIR . '/css/seotest.css');
+        if ($css === null) $css = array(SEOTOOLBOX_DIR.'/fonts/lato/lato.css', SEOTOOLBOX_DIR.'/css/seotest.css');
         Requirements::combine_files('seotest.css', $css);
 
         Requirements::combine_files('seotest.js', array(
-            SEOTOOLBOX_DIR . '/third-party/jquery-1.12.0.js',
-            SEOTOOLBOX_DIR . '/js/crawler.js',
-            SEOTOOLBOX_DIR . '/js/default_tests.js',
-            SEOTOOLBOX_DIR . '/js/crawler_init.js'
+            SEOTOOLBOX_DIR.'/third-party/jquery-1.12.0.js',
+            SEOTOOLBOX_DIR.'/js/crawler.js',
+            SEOTOOLBOX_DIR.'/js/default_tests.js',
+            SEOTOOLBOX_DIR.'/js/crawler_init.js'
         ));
     }
 
@@ -59,28 +59,28 @@ class SEOTestSiteTreeController extends Controller{
      * @param SS_HTTPRequest $request
      * @return String
      */
-    public function getPageData(SS_HTTPRequest $request){
-        $agent  = ( $request->getVar('agent') == 'mobile' )
+    public function getPageData(SS_HTTPRequest $request) {
+        $agent = ($request->getVar('agent') == 'mobile')
             ? $this->config()->get('mobile_user_agent')
             : $this->config()->get('desktop_user_agent');
 
-        $curl   = $this->loadPage($request->getVar('u'), $agent);
+        $curl = $this->loadPage($request->getVar('u'), $agent);
         $curl['phrases'] = $this->extractWords($curl['body']);
 
         Requirements::clear();
         return json_encode($curl);
     }
 
-    private function extractWords($html, $get_pure_word_count=false){
+    private function extractWords($html, $get_pure_word_count = false) {
         mb_internal_encoding('UTF-8');
         $html = preg_replace_callback(
             "/(&#[0-9]+;)/",
-            function($m){return mb_convert_encoding($m[1], "UTF-8", "HTML-ENTITIES");},
+            function($m) {return mb_convert_encoding($m[1], "UTF-8", "HTML-ENTITIES"); },
             $html
         );
         $html = str_replace(array("\n", "\r"), ' ', mb_strtolower($html));
 
-        if( $get_pure_word_count ) return strip_tags($html);
+        if ($get_pure_word_count) return strip_tags($html);
 
         $phrases = array();
 
@@ -105,12 +105,12 @@ class SEOTestSiteTreeController extends Controller{
             )
         );
 
-        foreach( $regex_find_replace as $commands ){
-            if(isset($commands['find'])){
-                preg_match_all( $commands['find'], $html, $matches );
-                array_walk($matches[$commands['find_pos']], function(&$phrase){
+        foreach ($regex_find_replace as $commands) {
+            if (isset($commands['find'])) {
+                preg_match_all($commands['find'], $html, $matches);
+                array_walk($matches[$commands['find_pos']], function(&$phrase) {
                     $words = explode(' ', strip_tags($phrase));
-                    array_walk($words, function(&$w){
+                    array_walk($words, function(&$w) {
                         $w = trim(preg_replace('/\s+/', ' ', strip_tags($w)));
                     });
                     $phrase = preg_replace('/\s+/', ' ', implode(' ', $words));
@@ -118,24 +118,24 @@ class SEOTestSiteTreeController extends Controller{
                 $phrases = array_merge($phrases, $matches[$commands['find_pos']]);
             }
 
-            if(isset($commands['replace']))
+            if (isset($commands['replace']))
                 $html = preg_replace($commands['replace'], ' ', $html);
         }
 
         // Remove the empty elements
-        $phrases = array_filter($phrases, function($phrase){return strlen(trim($phrase)) > 0;});
+        $phrases = array_filter($phrases, function($phrase) {return strlen(trim($phrase)) > 0; });
         $count = 0;
-        foreach( $phrases as $p ) $count += count(explode(' ', $p));
+        foreach ($phrases as $p) $count += count(explode(' ', $p));
         return $phrases;
     }
 
-    public function urlsAndSettings( SS_HTTPRequest $request ){
+    public function urlsAndSettings(SS_HTTPRequest $request) {
         Requirements::clear();
         return json_encode(array(
             'urls' => Versioned::get_by_stage('SiteTree', 'Live')
-                ->exclude( 'ClassName', 'RedirectorPage' )
-                ->exclude( 'ClassName', 'ErrorPage' )
-                ->map( 'ID', 'AbsoluteLink' )
+                ->exclude('ClassName', 'RedirectorPage')
+                ->exclude('ClassName', 'ErrorPage')
+                ->map('ID', 'AbsoluteLink')
                 ->toArray(),
 
             'settings' => array(
@@ -145,6 +145,9 @@ class SEOTestSiteTreeController extends Controller{
         ));
     }
 
+    /**
+     * @param string $data
+     */
     private function getHTMLFieldsData($data){
         preg_match_all('/\[\*\*\[(.*?)\]\*\*\[(.*?)\]\*\*\]/im', $data, $matches);
         foreach( $matches[2] as $key => $field_text ){
@@ -178,7 +181,9 @@ class SEOTestSiteTreeController extends Controller{
 
         curl_close( $ch );
 
-        if( !strpos( $header, ' 200 ' ) )return array( 'headers' => false, 'body' => false );
+        if( !strpos( $header, ' 200 ' ) ) {
+            return array( 'headers' => false, 'body' => false );
+        }
 
         $field_data = $this->getHTMLFieldsData($body);
         $body = str_replace($field_data[0], $field_data[2], $body);
@@ -192,13 +197,13 @@ class SEOTestSiteTreeController extends Controller{
      *
      * @return ErrorPage
      */
-    public static function getPermissionDeniedPage(){
-        $page = ErrorPage::get()->find( 'ErrorCode', 503 );
-        if( !$page ){
-            $page = ErrorPage::create( array(
+    public static function getPermissionDeniedPage() {
+        $page = ErrorPage::get()->find('ErrorCode', 503);
+        if (!$page) {
+            $page = ErrorPage::create(array(
                 'ErrorCode' => 503,
                 'Title'		=> 'Permission Denied'
-            ) );
+            ));
             $page->write();
         }
 
