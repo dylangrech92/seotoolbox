@@ -3,17 +3,16 @@
  * Plugin: SEOToolbox
  * Author: Dylan Grech
  * Copyright: 2016
- * License: Open GPL License V3.0
- * 
+ *
  * Global Auto Link Settings is a dataobject that is auto-created
- * on dev/build and contains all the global settings for the 
+ * on dev/build and contains all the global settings for the
  * automated links
  */
 class GlobalAutoLinkSettings extends DataObject{
-	
+
 	public static $enabled  = true;
     public static $encoding = 'UTF-8';
-	
+
 	private static $db = array(
 		'MaxLinksPerPage' => 'INT',
 		'ExcludeTags'	  => 'VARCHAR(255)',
@@ -21,7 +20,7 @@ class GlobalAutoLinkSettings extends DataObject{
 		'AddTo'           => 'Text',
         'CrawlID'         => 'VARCHAR(15)'
 	);
-	
+
 	private static $defaults = array(
 		'IncludeIn' => 'Content'
 	);
@@ -31,11 +30,11 @@ class GlobalAutoLinkSettings extends DataObject{
         'ExcludeTags'     => 'pre,h1,h2,h3,h4,h5,h6',
         'IncludeIn'		  => 'Content'
     );
-	
+
 	public function ExcludeTags(){
 		return array_unique( explode( ',', str_replace( ' ', '', $this->ExcludeTags ).',a,img,iframe,video,object' ) );
 	}
-	
+
 	public function IncludeInFields(){
 		return explode( ',', str_replace( ' ', '', $this->IncludeIn ) );
 	}
@@ -71,20 +70,20 @@ class GlobalAutoLinkSettings extends DataObject{
     /**
      * Returns a list of ClassNames where
      * auto links are allowed in
-     * 
+     *
      * Note: This function tries to cleanup user input
-     * 
+     *
      * @return array
      */
      public function AllowedIn(){
         $classes = array_values( ClassInfo::subclassesFor( 'SiteTree' ) );
         if( !$this->AddTo ) return $classes;
-        
+
         $sanitized = explode( ',', str_replace( ' ', '', strtolower( $this->AddTo ) ) );
-        
+
         for( $x = 0; $x < count( $sanitized ); $x++ ){
             $found = false;
-            
+
             foreach( $classes as $class ){
                 if( strtolower( $class ) === $sanitized[$x] ){
                     $sanitized[$x] = $class;
@@ -92,10 +91,10 @@ class GlobalAutoLinkSettings extends DataObject{
                     break 1;
                 }
             }
-            
+
             if( !$found ) unset( $sanitized[$x] );
         }
-        
+
         return (array) $sanitized;
      }
 

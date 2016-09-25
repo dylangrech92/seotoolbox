@@ -2,8 +2,7 @@
 /**
  * Plugin: SEOToolbox
  * Author: Dylan Grech
- * Copyright: 2015
- * License: Open GPL License V3.0
+ * Copyright: 2016
  *
  * Add the SEO Toolbox Controller Extension to the Content Controller
  * so it can create the automated links to all the pages

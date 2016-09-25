@@ -3,7 +3,6 @@
  * Plugin: SEOToolbox
  * Author: Dylan Grech
  * Copyright: 2016
- * License: Open GPL License V3.0
  *
  * SEOtoolbox Controller Extension decorates the Content Controller
  * to add the auotamted links to a page where needed

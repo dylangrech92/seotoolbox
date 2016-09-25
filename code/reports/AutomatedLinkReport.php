@@ -3,13 +3,12 @@
  * Plugin: SEOToolbox
  * Author: Dylan Grech
  * Copyright: 2016
- * License: Open GPL License V3.0
- * 
+ *
  * Automated Link Report is a report that lists all automated
  * links and how they affect the website
  */
 class AutomatedLinkReport extends SS_Report{
-        
+
     protected $title       = 'Automated Link Report';
     protected $description = 'Shows a list of all automated links and how they affect the site';
 
@@ -33,7 +32,7 @@ class AutomatedLinkReport extends SS_Report{
             'TotalLinks'        => 'Total Amount of links'
         );
     }
-    
+
     public function sourceRecords( $params, $sort, $limit ){
         if( !Config::inst()->get( $this->class, 'run_in_realtime' ) ) {
             return AutomatedLinkPageResult::get();
