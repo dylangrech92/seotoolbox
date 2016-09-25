@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * Class AutomatedLinkReportTask
+ * Creates AutomatedLinkPageResult to be used in AutomatedLinkReport
+ *
+ * @see AutomatedLinkPageResult
+ * @see AutomatedLinkReport
+ *
+ */
 class AutomatedLinkReportTask extends Controller {
 
     private   $GlobalSettings;
@@ -70,14 +78,14 @@ class AutomatedLinkReportTask extends Controller {
         // Set a list of all fields that can have autolinks created in them
         $page->AutomateableFields = ArrayList::create();
 
-        foreach ($this->getAllDatabaseFields($page->class) as $field => $type)
+        foreach (AutomatedLink::getAllDatabaseFields($page->class) as $field => $type)
             if (in_array($field, $includeIn) &&
                 !$page->AutomateableFields->find('DataField', $field) &&
                 AutomatedLink::isFieldParsable($page, $field)
             ) $page->AutomateableFields->push(DataObject::create(array('DataField' => $field)));
 
         // Get data Pre-Automated Links creation
-        $withLinks = $this->getPageDOM($page, true);
+        $withLinks = $this->getPageDOM($page);
         if (!$withLinks) return false;
 
         $links = $withLinks->getElementsByTagName('a');
@@ -105,31 +113,16 @@ class AutomatedLinkReportTask extends Controller {
     }
 
     /**
-     * Return all possible database fields for the
-     * $class provided
-     *
-     * @param String $class
-     * @return array
-     */
-    private function getAllDatabaseFields($class) {
-        $fields = array();
-        foreach (ClassInfo::ancestry($class, true) as $cls)
-            $fields = array_merge($fields, (array) DataObject::database_fields($cls));
-
-        return $fields;
-    }
-
-    /**
      * Returns a rendered version of the page supplied
      * creating automated links according inside a DOMDocument
      * object or false if anything fails.
      *
      * @param SiteTree $page
-     * @return DOMDocument
+     * @return DOMDocument|false
      */
     private function getPageDOM(SiteTree $page) {
         $controllerClass = $page->class.'_Controller';
-        if (!class_exists($controllerClass))  $controller = $page->class.'Controller';
+        if (!class_exists($controllerClass))  $controllerClass = $page->class.'Controller';
         if (!class_exists($controllerClass)) return false;
 
         $controller = $controllerClass::create($page);

@@ -7,6 +7,12 @@
  * Global Auto Link Settings is a dataobject that is auto-created
  * on dev/build and contains all the global settings for the
  * automated links
+ *
+ * @property int MaxLinksPerPage
+ * @property string ExcludeTags
+ * @property string IncludeIn
+ * @property string AddTo
+ * @property string CrawlID
  */
 class GlobalAutoLinkSettings extends DataObject{
 

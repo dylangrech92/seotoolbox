@@ -8,6 +8,16 @@
  * about a link that should be created automatically to a page
  *
  * @method SiteTree|null Page()
+ * @property string Phrase
+ * @property string TitleTag
+ * @property string AnchorTag
+ * @property boolean NewWindow
+ * @property boolean NoFollow
+ * @property boolean SelfLinking
+ * @property boolean CaseSensitive
+ * @property int MaxLinksPerPage
+ * @property int Priority
+ * @property int PageID
  */
 class AutomatedLink extends DataObject implements PermissionProvider {
 
@@ -66,23 +76,23 @@ class AutomatedLink extends DataObject implements PermissionProvider {
         return $this->getHTML();
     }
 
-    function canView( $member = false ){
+    public function canView( $member = false ){
         return Permission::check('AUTOMATEDLINK_VIEW');
     }
 
-    function canEdit( $member = false ){
+    public function canEdit( $member = false ){
         return Permission::check('AUTOMATEDLINK_EDIT');
     }
 
-    function canDelete( $member = false ){
+    public function canDelete( $member = false ){
         return Permission::check('AUTOMATEDLINK_DELETE');
     }
 
-    function canCreate( $member = false ){
+    public function canCreate( $member = false ){
         return Permission::check('AUTOMATEDLINK_CREATE');
     }
 
-    function providePermissions() {
+    public function providePermissions() {
        return array(
          'AUTOMATEDLINK_VIEW'   => 'View Automated Links',
          'AUTOMATEDLINK_EDIT'   => 'Edit Automated Links',
@@ -220,11 +230,7 @@ class AutomatedLink extends DataObject implements PermissionProvider {
      */
     public static function isFieldParsable(SiteTree $page, $field) {
         if (!isset(self::$parsableFields[$page->ID]) || !isset(self::$parsableFields[$page->ID][$field])) {
-            $fields = array();
-
-            foreach (ClassInfo::ancestry($page->ClassName, true) as $class)
-                $fields = array_merge($fields, (array) DataObject::database_fields($class));
-
+            $fields = self::getAllDatabaseFields($page->ClassName);
             self::$parsableFields[$page->ID][$field] =
                 (Boolean) array_key_exists($field, $fields) && strtolower($fields[$field]) === 'htmltext' && $page->$field;
         }
@@ -266,5 +272,19 @@ class AutomatedLink extends DataObject implements PermissionProvider {
         }
 
         return $dom;
+    }
+
+    /**
+     * Returns an array with all the database fields $class has
+     *
+     * @param string $class
+     * @return array
+     */
+    public static function getAllDatabaseFields($class){
+        $fields = array();
+        foreach (ClassInfo::ancestry($class, true) as $ancestor){
+            $fields = array_merge($fields, (array) DataObject::database_fields($ancestor));
+        }
+        return $fields;
     }
 }

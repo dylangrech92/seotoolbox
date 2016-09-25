@@ -33,7 +33,7 @@ class AutomatedLinkReport extends SS_Report{
         );
     }
 
-    public function sourceRecords( $params, $sort, $limit ){
+    public function sourceRecords(){
         if( !Config::inst()->get( $this->class, 'run_in_realtime' ) ) {
             return AutomatedLinkPageResult::get();
         }
