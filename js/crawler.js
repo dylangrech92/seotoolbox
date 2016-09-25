@@ -220,15 +220,14 @@ const crawler = {
                         return true;
                     }
                 }
-                crawler.trigger('CRAWL_LOAD_FAILED', [url]);
+                return crawler.trigger('CRAWL_LOAD_FAILED', [url]);
             })
             .fail( function(){ return crawler.trigger('CRAWL_LOAD_FAILED', [url]); })
             .always( function(){
-                crawler.trigger('CRAWL_FINISHED', [url]);
                 if((this.hasOwnProperty('skipped') && this.skipped) || crawler.tested.indexOf(url) < 0 ) {
                     crawler.tested.push(url)
                 }
-                return true;
+                return crawler.trigger('CRAWL_FINISHED', [url]);
             });
     },
 
@@ -511,10 +510,11 @@ const crawler_painter = {
      * Return the container matching the provided name
      *
      * @param {string} name
-     * @return {jQuery}
+     * @return {jQuery|undefined}
      */
     get_container_by_name: function(name){
         for(var c in this.containers) if(this.containers[c]['name'] == name) return this.containers[c]['container'];
+        return undefined;
     },
 
     /**

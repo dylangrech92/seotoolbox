@@ -35,7 +35,7 @@ const default_tests = [
         callback: function(cont, url, html){
             var h2      = html.find( 'h2' ),
                 link    = crawler_painter.create_link(url, url),
-                joined  = [], status = undefined;
+                joined  = [], status;
 
             h2.each(function(){ joined.push(this.innerHTML); });
 
@@ -93,7 +93,7 @@ const default_tests = [
                 word_count      = crawler.get_word_count(phrases),
                 density         = (links.length > 0) ? word_count / links.length : false,
                 dens_text       = (density != false) ? density.toFixed(2) +' words/link' : 'No internal links',
-                status;
+                status          = crawler_painter.create_status('success', 'OK!');
 
             if( ( art_density !== false && art_density < 100 ) )
                 status = crawler_painter.create_status('warning', 'This page might be considered spammy');
@@ -183,9 +183,10 @@ const default_tests = [
         title: 'META TITLE',
         headers: ['URL', 'Meta Title', 'Length', 'Status'],
         callback: function(cont, url, html){
-            var title = html.filter( 'title' ),
-                link  = crawler_painter.create_link(url, url),
-                text  = '', len = 0, status = undefined;
+            var title   = html.filter( 'title' ),
+                link    = crawler_painter.create_link(url, url),
+                text    = '', len = 0,
+                status  = crawler_painter.create_status('success', 'OK!');
 
             if( title.length > 1 ){
                 text = 'Multiple Titles';
@@ -198,7 +199,6 @@ const default_tests = [
                 len = text.length;
                 if(len < 40) status = crawler_painter.create_status('warning', 'Meta title is too short');
                 else if(len > 56) status = crawler_painter.create_status('warning', 'Meta title is too long');
-                else status = crawler_painter.create_status('success', 'OK!');
             }
 
             crawler_painter.add_row(this.name, [link, text, len, status]);
@@ -249,8 +249,7 @@ const default_tests = [
         headers: ['URL'],
         type: 'success',
         callback: function(cont, url, html){
-            var tags = html.filter( 'link' ),
-                canonical = undefined;
+            var tags = html.filter( 'link' ), canonical;
 
             for( var i = 0; i < tags.length; i++ ) {
                 var rel = $(tags[i]).attr('rel');
@@ -300,15 +299,14 @@ const default_tests = [
         type: 'success',
         callback: function(cont, url){
             var link = crawler_painter.create_link(url, url),
-                type = 'warning',
-                msg  = 'OK!';
+                msg;
 
             if( url.length > 115 )                  msg = 'URL is too long';
             else if( url.toLowerCase() != url )     msg = 'URL is not in lower case';
             else if( url.replace('_','') !== url )  msg = 'URL contains under scores';
             else return true;
 
-            crawler_painter.add_row(this.name, [link, crawler_painter.create_status(type, msg)]);
+            crawler_painter.add_row(this.name, [link, crawler_painter.create_status('warning', msg)]);
 
             return true;
         }
@@ -347,6 +345,7 @@ const default_tests = [
 
             function getKeyFromObject(object, search){
                 for( var key in object ) if( object[key].indexOf(search) >= 0 ) return key;
+                return undefined;
             }
 
             return true;
