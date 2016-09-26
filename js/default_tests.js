@@ -185,26 +185,14 @@ const default_tests = [
         callback: function(cont, url, html){
             var title   = html.filter( 'title' ),
                 link    = crawler_painter.create_link(url, url),
-                text    = '', len = 0,
-                status  = crawler_painter.create_status('success', 'OK!');
+                text    = (title.length == 1) ? title.html() : '',
+                status  = crawler_painter.get_meta_tags_status(title, 'meta title', text, 40, 56);
 
-            if( title.length > 1 ){
-                text = 'Multiple Titles';
-                len  = 'N/A';
-                status = crawler_painter.create_status('error', 'Multiple title tags');
-            }else if( title.length < 1 ){
-                status = crawler_painter.create_status('error', 'Missing title tag');
-            }else{
-                text = title.html();
-                len = text.length;
-                if(len < 40) status = crawler_painter.create_status('warning', 'Meta title is too short');
-                else if(len > 56) status = crawler_painter.create_status('warning', 'Meta title is too long');
+            if(title.length == 1){
+                crawler.set_property('meta_titles', text, url);
             }
 
-            crawler_painter.add_row(this.name, [link, text, len, status]);
-            if(!crawler.hasOwnProperty('meta_titles')) crawler.meta_titles = {};
-            if(!crawler.meta_titles.hasOwnProperty(text)) crawler.meta_titles[text] = [url];
-            else crawler.meta_titles[text].push(url);
+            crawler_painter.add_row(this.name, [link, text, text.length, status]);
 
             return true;
         }
@@ -215,29 +203,16 @@ const default_tests = [
         title: 'META DESCRIPTION',
         headers: ['URL', 'Meta Description', 'Length', 'Status'],
         callback: function(cont, url, html){
-            var desc = html.filter( 'meta[name=description]' ),
-                link  = crawler_painter.create_link(url, url),
-                text  = '', len = 0, status;
+            var desc    = html.filter( 'meta[name=description]' ),
+                link    = crawler_painter.create_link(url, url),
+                text    = (desc.length == 1) ? desc.attr('content') : '',
+                status  = crawler_painter.get_meta_tags_status(desc, 'meta description', text, 70, 156);
 
-            if( desc.length > 1 ){
-                text = 'Multiple Meta Descriptions';
-                len  = 'N/A';
-                status = crawler_painter.create_status('error', 'Multiple meta description tags');
-            }else if( desc.length < 1 ){
-                status = crawler_painter.create_status('error', 'Missing meta description tag');
-            }else{
-                text = desc.attr('content');
-                len = text.length;
-                if(len < 70) status = crawler_painter.create_status('warning', 'Meta description is too short');
-                else if(len > 156) status = crawler_painter.create_status('warning', 'Meta description is too long');
-                else status = crawler_painter.create_status('success', 'OK!');
-
-                if(!crawler.hasOwnProperty('descriptions')) crawler.descriptions = {};
-                if(!crawler.descriptions.hasOwnProperty(text)) crawler.descriptions[text] = [url];
-                else crawler.descriptions[text].push(url);
+            if( desc.length == 1 ){
+                crawler.set_property('descriptions', text, url);
             }
 
-            crawler_painter.add_row(this.name, [link, text, len, status]);
+            crawler_painter.add_row(this.name, [link, text, text.length, status]);
 
             return true;
         }
@@ -245,8 +220,8 @@ const default_tests = [
 
     {
         name: 'canonical_info',
-        title: 'PAGES MISSING CANONICAL',
-        headers: ['URL'],
+        title: 'CANONICAL INFO',
+        headers: ['URL', 'Status'],
         type: 'success',
         callback: function(cont, url, html){
             var tags = html.filter( 'link' ), canonical;
@@ -259,15 +234,12 @@ const default_tests = [
                 }
             }
 
-            if(canonical === undefined || canonical.length < 1) {
-                crawler_painter.add_row(this.name, [crawler_painter.create_link(url, url)]);
-                crawler_painter.set_type(this.name, 'error');
+            if(canonical === undefined || canonical.length != 1) {
+                var status = crawler_painter.create_status('error', 'Missing / Multiple canonicals found');
+                crawler_painter.add_row(this.name, [crawler_painter.create_link(url, url), status]);
+            }else{
+                crawler.set_property('canonicals', canonical, url);
             }
-
-            canonical = url; // What Google will do
-            if(!crawler.hasOwnProperty('canonicals')) crawler.canonicals = {};
-            if(!crawler.canonicals.hasOwnProperty(canonical)) crawler.canonicals[canonical] = [url];
-            else crawler.canonicals[canonical].push(url);
 
             return true;
         }
@@ -407,3 +379,31 @@ crawler.on('CRAWL_FINISHED', function(){
 
     return true;
 });
+
+/**
+ * Gets the status box for the meta tag being tested
+ * Append to the crawler_painter
+ *
+ * @param {Array} tags
+ * @param {string} tag_name
+ * @param {string} text
+ * @param {int} min_char
+ * @param {int} max_char
+ * @returns {jQuery}
+ */
+crawler_painter.get_meta_tags_status = function(tags, tag_name, text, min_char, max_char){
+    if( tags.length > 1 ){
+        return this.create_status('error', 'Multiple '+tag_name+' tags');
+    }else if( tags.length < 1 ){
+        return this.create_status('error', 'Missing '+tag_name+' tag');
+    }else{
+        var len = text.length;
+        if(len < min_char){
+            return this.create_status('warning', tag_name+' is too short');
+        }else if(len > max_char){
+            return this.create_status('warning', tag_name+' is too long');
+        }else{
+            return this.create_status('success', 'OK!');
+        }
+    }
+}

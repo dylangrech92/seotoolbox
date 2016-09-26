@@ -342,6 +342,20 @@ const crawler = {
     },
 
     /**
+     * Set an arbitrary property on the crawler object
+     *
+     * @param {string} property
+     * @param {string|int} key
+     * @param {*} val
+     * @return undefined
+     */
+    set_property: function(property, key, val){
+        if(!this.hasOwnProperty(property)) this[property] = {};
+        if(!this[property].hasOwnProperty(key)) this[property][key] = [val];
+        else this[property][key].push(val);
+    },
+
+    /**
      * Start the crawler
      *
      * @param {object} settings
