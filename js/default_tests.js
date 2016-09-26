@@ -375,29 +375,35 @@ const default_tests = [
     {
         name: 'orphan_pages',
         title: 'ORPHAN PAGES',
-        headers: ['URL'],
-        callback: function(){
-            if(crawler.que.length > 0) return true;
-            crawler_painter.reset_table(this.name, 'success');
-
-            pages_loop:
-            for( var i in crawler.tested ){
-                var url = crawler.tested[i];
-                if( crawler.linked_from.hasOwnProperty(url) ) {
-                    for (var x in crawler.linked_from[url])
-                        if (crawler.linked_from[url][x] != url) continue pages_loop;
-                }
-
-                crawler.add_row(this.name, [crawler_painter.create_link(crawler.tested[i], crawler.tested[i])]);
-                crawler_painter.set_type(this.name, 'error');
-            }
-
-            return true;
-        }
+        headers: ['URL']
     }
 ];
 
 crawler.on('CRAWL_LOAD_FAILED', function(url){
     crawler_painter.add_row('error_pages', [url]);
     crawler_painter.set_type('error_pages', 'error');
+});
+
+crawler.on('CRAWL_FINISHED', function(){
+    if(crawler.que.length > 0) return true;
+    crawler_painter.reset_table('orphan_pages', 'success');
+
+    pages_loop:
+        for( var i in crawler.tested ){
+            var url = crawler.tested[i];
+
+            if( crawler.failed.indexOf(url) >= 0 ){
+                continue pages_loop;
+            }
+
+            if( crawler.linked_from.hasOwnProperty(url) ) {
+                for (var x in crawler.linked_from[url])
+                    if (crawler.linked_from[url][x] != url) continue pages_loop;
+            }
+
+            crawler.add_row('orphan_pages', [crawler_painter.create_link(crawler.tested[i], crawler.tested[i])]);
+            crawler_painter.set_type('orphan_pages', 'error');
+        }
+
+    return true;
 });

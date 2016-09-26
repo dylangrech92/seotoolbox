@@ -36,6 +36,7 @@ class SEOTestSiteTreeController extends Controller {
 
         Requirements::combine_files('seotest.js', array(
             SEOTOOLBOX_DIR.'/third-party/jquery-1.12.0.js',
+            SEOTOOLBOX_DIR.'/js/crawler_painter.js',
             SEOTOOLBOX_DIR.'/js/crawler.js',
             SEOTOOLBOX_DIR.'/js/default_tests.js',
             SEOTOOLBOX_DIR.'/js/crawler_init.js'
