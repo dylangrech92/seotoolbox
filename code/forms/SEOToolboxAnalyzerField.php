@@ -17,7 +17,7 @@ class SEOToolboxAnalyzerField extends LiteralField {
     private function createBaseHTML($name, $url) {
         $div    = "<div id='seotoolbox_con_{$name}'><div class='clearfix result_cont'></div></div>";
         $script = "<script type='text/javascript'>
-                    (function(\$){new PageAnalyzer(\$('#seotoolbox_con_{$name} .result_cont'),'{$url}')}(jQuery))
+                    new PageAnalyzer(jQuery('#seotoolbox_con_{$name} .result_cont'),'{$url}');
                    </script>";
         return $div.$script;
     }

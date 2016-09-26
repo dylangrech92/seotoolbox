@@ -365,7 +365,7 @@ crawler.on('CRAWL_FINISHED', function(){
             var url = crawler.tested[i];
 
             if( crawler.failed.indexOf(url) >= 0 ){
-                continue pages_loop;
+                continue;
             }
 
             if( crawler.linked_from.hasOwnProperty(url) ) {
@@ -406,4 +406,4 @@ crawler_painter.get_meta_tags_status = function(tags, tag_name, text, min_char, 
             return this.create_status('success', 'OK!');
         }
     }
-}
+};

@@ -4,10 +4,6 @@ body,html{background: #222a2d;font-family:'Lato';}
 .text-white{color:#FFF}
 .bg-dark{background: #222a2d;}
 .popup-settings{padding:20px 0 10px 0}
-.icon{width:16px;height: 16px;cursor:pointer;background: url('/segmentmodules/seotoolbox/css/icons/icon_sprite.png');}
-.icon.closed{background-position: 0px -34px;position: absolute;top: 17px;right: 36px;}
-.icon.opened{background-position: 0px 0px;position: absolute;top: 17px;right: 36px;}
-.icon.export{background-position: 0px -17px;position: absolute;top: 17px;right: 10px;}
 .container-default{margin: 0 auto;position: relative;background: #273135;padding-bottom:20px}
 .wrapper{width:80%}
 .header{width:100%;color:#FFF;}
@@ -17,6 +13,7 @@ body,html{background: #222a2d;font-family:'Lato';}
 .infobox{background:#FFF;margin-top:20px;}
 .infobox .header{line-height: 30px;position: relative;}
 .infobox h2{padding:10px;}
+.infobox .header .icon{font-size: 24px;padding: 10px 10px 0 0;cursor: pointer;}
 .infobox .count{font-weight:900;font-size:18px;padding:0 20px;line-height:50px;}
 .infobox thead{color:#FFF}
 .infobox.purple .header, .infobox.purple thead{background:#80718e}

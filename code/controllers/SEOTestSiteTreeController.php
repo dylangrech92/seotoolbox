@@ -2,9 +2,6 @@
 
 class SEOTestSiteTreeController extends Controller {
 
-    private static $sprite_path = null;
-    private static $css         = null;
-
     private static $desktop_user_agent  = 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36';
     private static $mobile_user_agent   = 'Mozilla/5.0 (Linux; <Android Version>; <Build Tag etc.>) AppleWebKit/<WebKit Rev> (KHTML, like Gecko) Chrome/<Chrome Rev> Mobile Safari/<WebKit Rev>';
 
@@ -16,23 +13,18 @@ class SEOTestSiteTreeController extends Controller {
     public function init() {
         parent::init();
 
-        // Check user is logged in and has permission to access to SEO Toolbox Admin
-        if (!Member::currentUser()) return $this->redirect(Security::login_url().'?BackURL=/seotest');
-        if (!Permission::check('CMS_ACCESS_SEOToolboxAdmin')) return $this->redirect(self::getPermissionDeniedPage()->Link());
-
         Requirements::clear();
 
-        // Sprite Location needs to be dynamic as devs can install module in different locations
-        $sprite_path = $this->config()->get('sprite_path');
-        if ($sprite_path === null) $sprite_path = SEOTOOLBOX_DIR.'/css/icons/icon_sprite.png';
-        Requirements::customCSS(".icon{width:16px;height: 16px;cursor:pointer;background: url(/{$sprite_path});}");
+        if (!Member::currentUser()  || !Permission::check('CMS_ACCESS_SEOToolboxAdmin')){
+            return $this->redirect(Security::login_url().'?BackURL=/seotest');
+        }
 
-        // CSS can be replaced by devs if they desire to change styling
         Requirements::css(SEOTOOLBOX_DIR.'/third-party/bootstrap/css/bootstrap.min.css');
         Requirements::css(SEOTOOLBOX_DIR.'/third-party/bootstrap/css/bootstrap-theme.min.css');
-        $css = $this->config()->get('css');
-        if ($css === null) $css = array(SEOTOOLBOX_DIR.'/fonts/lato/lato.css', SEOTOOLBOX_DIR.'/css/seotest.css');
-        Requirements::combine_files('seotest.css', $css);
+        Requirements::combine_files('seotest.css', array(
+            SEOTOOLBOX_DIR.'/css/fonts/lato/lato.css',
+            SEOTOOLBOX_DIR.'/css/seotest.css'
+        ));
 
         Requirements::combine_files('seotest.js', array(
             SEOTOOLBOX_DIR.'/third-party/jquery-1.12.0.js',

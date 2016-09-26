@@ -14,8 +14,8 @@ const crawler_painter = {
         var container       = $('<div class="infobox" id="'+name+'"></div>'),
             header          = $('<div class="header clearfix"></div>'),
             count           = $('<div class="count left"></div>'),
-            toggle_button   = $('<div class="icon toggle right closed"></div>').hide(),
-            export_button   = $('<div class="icon export right"></div>').hide(),
+            export_button   = $('<div class="icon export glyphicon glyphicon-export right"></div>').hide(),
+            toggle_button   = $('<div class="icon toggle glyphicon glyphicon-arrow-down right"></div>').hide(),
             title_bar       = $('<h2 class="left">'+title+'</h2>'),
             table_cont      = $('<div class="tableCont" style="display:none;"></div>'),
             thead           = $('<tr></tr>'),
@@ -31,9 +31,9 @@ const crawler_painter = {
         toggle_button.click(function(){
             crawler.trigger('TOGGLED', [name]);
             var $this   = $(this),
-                css     = ($this.hasClass('closed')) ? 'opened' : 'closed';
+                css     = ($this.hasClass('glyphicon-arrow-down')) ? 'glyphicon-arrow-up' : 'glyphicon-arrow-down';
             $this.parents('.infobox').find('.tableCont').slideToggle();
-            $this.removeClass('opened closed');
+            $this.removeClass('glyphicon-arrow-up glyphicon-arrow-down');
             $this.addClass(css);
         });
 
@@ -77,8 +77,7 @@ const crawler_painter = {
 
         // Show icons if we have items
         if( len > 0 ){
-            cont.find('.icon.export').fadeIn();
-            cont.find('.icon.toggle').fadeIn();
+            cont.find('.icon').fadeIn();
         }
 
         cont.find('.count').html(len);
@@ -102,8 +101,7 @@ const crawler_painter = {
 
         cont.find('tbody tr').remove();
         cont.find('.count').html('');
-        cont.find('.icon.export').hide();
-        cont.find('.icon.toggle').hide();
+        cont.find('.icon').hide();
 
         if( type != undefined ) this.set_type(name, type);
 
@@ -189,6 +187,7 @@ const crawler_painter = {
      * Returns a link out of the passed url
      *
      * @param {string} url
+     * @param {string|undefined} anchor
      * @returns {string}
      */
     create_link: function(url, anchor){

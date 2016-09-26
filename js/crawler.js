@@ -171,16 +171,14 @@ const crawler = {
      * @returns {boolean}
      */
     is_external: function(url){
-        // Starts with / or # or doesn't have :// in it has to be internal
-        if( url.length < 1 || url[0] == '/' || url[0] == '#' || url.indexOf('://') < 0 ) return false;
-
-        // If we removed the domain and the url is still the same then it's an internal link without the leading /
-        if( url == this.sanitize( url ) ) return false;
-
-        // The domain is the same the domain we're running this script on
-        if( this.get_domain( url ) == location.hostname ) return false;
-
-        return true;
+        return !(
+            url.length < 1              ||
+            url[0] == '/'               ||
+            url[0] == '#'               ||
+            url.indexOf('://') < 0      ||
+            url == this.sanitize( url ) ||
+            this.get_domain( url ) == location.hostname
+        );
     },
 
     /**
