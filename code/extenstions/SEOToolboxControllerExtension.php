@@ -123,18 +123,16 @@ class SEOToolboxControllerExtension extends Extension {
     }
 
     /**
-     * Parse the provided field and add the necessary links
+     * Goes through $tags and replaces them in $html with a hash of themselves.
+     * Returns an array of hash keys used and the original value
      *
      * @param DOMDocument $html
-     * @param String $field
-     * @return string
+     * @param array $hash_tags
+     * @return array
      */
-    private function parseField( DOMDocument $html, $field ){
-        $this->owner->extend( 'beforeParseField', $html, $field );
-
-        // Remove Tags from Content we wown't be using
+    private function hashTags( DOMDocument $html, $hash_tags ){
         $excluded = array();
-        foreach( $this->excludeTags as $eTag ){
+        foreach( $hash_tags as $eTag ){
             while( $tags = $html->getElementsByTagName( $eTag ) ){
                 if( !$tags->length ) break 1;
                 $tag	= $tags->item(0);
@@ -148,53 +146,79 @@ class SEOToolboxControllerExtension extends Extension {
             }
         }
 
-        $body    = (string)$html->saveHTML( $html->getElementsByTagName('body')->item(0) );
-        $content = preg_replace( array( '/\<body\>/is', '/\<\/body\>/is' ), '', $body, 1 );
+        return $excluded;
+    }
 
-        // Create the links
-        $links = AutomatedLink::get()->sort('Priority');
-        foreach( $links as $link ){
-            // Check if self-linking is allowed and if current pagetype is allowed
-            if( !$link->canBeAdded( $this->owner, $field ) ) continue;
+    /**
+     * Adds the passed automated link to $content if possible.
+     * Returns an array of hashed that have been added and the original value that was replaced
+     *
+     * @param AutomatedLink $link
+     * @param string $content
+     * @return array
+     */
+    public function addLinkToContent(AutomatedLink $link, &$content){
+        $links  = array();
+        $max    = (int) ( $link->MaxLinksPerPage > 0 ) ? $link->MaxLinksPerPage : PHP_INT_MAX;
+        $escape = (string) preg_quote( $link->Phrase, '/' );
+        $regex  = (string) ( $link->CaseSensitive ) ? "/(\b{$escape}\b)/" : "/(\b{$escape}\b)/i";
 
-            $max    = (int) ( $link->MaxLinksPerPage > 0 ) ? $link->MaxLinksPerPage : PHP_INT_MAX;
-            $escape = (string) preg_quote( $link->Phrase, '/' );
-            $regex  = (string) ( $link->CaseSensitive ) ? "/(\b{$escape}\b)/" : "/(\b{$escape}\b)/i";
+        // Count the matches
+        preg_match_all( $regex, $content, $count );
+        $count = ( is_array( $count ) && isset( $count[0] ) ) ? count( $count[0] ) : 0;
+        if( $count < 1 ) $links;
 
-            // Count the matches
-            preg_match_all( $regex, $content, $count );
-            $count = ( is_array( $count ) && isset( $count[0] ) ) ? count( $count[0] ) : 0;
-            if( $count < 1 ) continue;
+        if( isset( $this->maxLinksPerPage[ $link->ID ] ) ) {
+            $max -= $this->maxLinksPerPage[$link->ID];
+        } else {
+            $this->maxLinksPerPage[$link->ID] = 0;
+        }
 
-            if( isset( $this->maxLinksPerPage[ $link->ID ] ) )
-                $max -= $this->maxLinksPerPage[ $link->ID ];
-            else
-                $this->maxLinksPerPage[ $link->ID ] = 0;
+        for( $x = 0; $x < $count; $x++ ){
+            // Stop adding links if we reached the link or page limit
+            if( $x >= $max || $this->linkCount >= $this->maxLinks ) break;
 
-            for( $x = 0; $x < $count; $x++ ){
-                // Stop adding links if we reached the link or page limit
-                if( $x >= $max || $this->linkCount >= $this->maxLinks ) break;
+            // Check if there is anything else to replace else stop
+            preg_match( $regex, $content, $match );
+            if( !is_array( $match ) || !count( $match ) ) break;
 
-                // Check if there is anything else to replace else stop
-                preg_match( $regex, $content, $match );
-                if( !is_array( $match ) || !count( $match ) ) break;
+            if( !$html = (string) $link->getHTML( $match[0] ) ) continue;
+            $key            = (string) crc32( $html );
+            $links[ $key ]  = (string) $html;
 
-                if( !$html = (string) $link->getHTML( $match[0] ) ) continue;
-                $key              = (string) crc32( $html );
-                $excluded[ $key ] = (string) $html;
+            $content = preg_replace( $regex, $key, $content, 1 );
+            $this->linkCount++;
+            $this->maxLinksPerPage[ $link->ID ]++;
+        }
 
-                $content = preg_replace( $regex, $key, $content, 1 );
-                $this->linkCount++;
-                $this->maxLinksPerPage[ $link->ID ]++;
+        return $links;
+    }
+
+    /**
+     * Parse the provided field and add the necessary links
+     *
+     * @param DOMDocument $html
+     * @param String $field
+     * @return string
+     */
+    private function parseField( DOMDocument $html, $field ){
+        $this->owner->extend( 'beforeParseField', $html, $field );
+
+        // Remove Tags from Content we wown't be using
+        $excluded   = $this->hashTags($html, $this->excludeTags);
+        $body       = (string)$html->saveHTML( $html->getElementsByTagName('body')->item(0) );
+        $content    = preg_replace( array( '/\<body\>/is', '/\<\/body\>/is' ), '', $body, 1 );
+
+        foreach( AutomatedLink::get()->sort('Priority') as $link){
+            if( $this->linkCount < $this->maxLinks && $link->canBeAdded( $this->owner, $field ) ) {
+                $links = $this->addLinkToContent($link, $content);
+                if( is_array($links) && count($links) > 0 ) {
+                    $excluded = $excluded + $links;
+                }
             }
-
-            // Stop Adding links if we reached the page limit
-            if( $this->linkCount >= $this->maxLinks ) break;
         }
 
         // Re-add the excluded Tags
-        $content = str_replace( array_keys( $excluded ), array_values( $excluded ), $content );
-
-        return $content;
+        return str_replace( array_keys( $excluded ), array_values( $excluded ), $content );
     }
 }
