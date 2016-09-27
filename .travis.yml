@@ -14,4 +14,4 @@ matrix:
       env: DB=MYSQL CORE_RELEASE=3.3
 
 script:
- - phpunit seotoolbox/tests/
+ - framework/sake dev/tests/module/seotoolbox
