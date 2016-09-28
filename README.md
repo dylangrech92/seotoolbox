@@ -1,7 +1,7 @@
 SEO Toolbox
 =================
 
-[![Build Status](https://scrutinizer-ci.com/g/dylangrech92/seotoolbox/badges/build.png?b=master)](https://scrutinizer-ci.com/g/dylangrech92/seotoolbox/build-status/master)
+[![Build Status](https://travis-ci.org/dylangrech92/seotoolbox.svg?branch=master)](https://travis-ci.org/dylangrech92/seotoolbox)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/dylangrech92/seotoolbox/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/dylangrech92/seotoolbox/?branch=master)
 
 This plugin was created to facilitate SEO work. It adds functionality in 3
