@@ -17,7 +17,7 @@ const crawler = {
      * @param {string} name
      * @param {string} title
      * @param {Array} headers
-     * @param {string} callable
+     * @param {*} callable
      * @returns {undefined}
      * @throws Exception
      */
@@ -201,9 +201,7 @@ const crawler = {
         var url = this.que.pop();
         this.crawling.push(url);
 
-        $.ajax({
-            url: this.get_proxy( url ), data: { agent: this.useragent }, accepts: 'json', dataType: 'json'
-        })
+        $.ajax({ url: this.get_proxy( url ), data: { agent: this.useragent }, accepts: 'json', dataType: 'json' })
             .done(function( result ) {
                 if(result['headers'] && result['body'] && result['body'].toLowerCase().indexOf('<head') >= 0) {
                     if( !crawler.is_external(result['url_fetched']) ) {

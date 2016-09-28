@@ -7,7 +7,9 @@
 
             $('#init-form').fadeIn();
             $('#init-crawler-btn').click(function(){
-                crawler.useragent = $('#user-agent').val();
+                crawler.robots_url  = $('#robots-url').val();
+                crawler.sitemap_url = $('#sitemap-url').val();
+                crawler.useragent   = $('#user-agent').val();
 
                 // Register the default tests
                 for( var i in default_tests ){

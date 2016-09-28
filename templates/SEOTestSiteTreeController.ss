@@ -23,6 +23,14 @@
                                 <option value="mobile">Mobile</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="robots-url" class="text-white">Robots URL</label>
+                            <input type="text" name="robots-url" id="robots-url" value="robots.txt" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="sitemap-url" class="text-white">Sitemap URL</label>
+                            <input type="text" name="sitemap-url" id="sitemap-url" value="sitemap.xml" class="form-control" />
+                        </div>
                         <div class="form-group text-right">
                             <button class="btn text-large btn-success" type="button" id="init-crawler-btn">
                                 <span class="glyphicon glyphicon-play">&nbsp;</span>START
