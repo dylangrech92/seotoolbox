@@ -66,6 +66,7 @@ const crawler_painter = {
      *
      * @param {string} name
      * @param {Array} data
+     * @return undefined
      */
     add_row: function(name, data){
         var cont    = this.get_container_by_name(name),
@@ -87,6 +88,20 @@ const crawler_painter = {
         else if( cont.find('td div.alert-warning').length > 0 ) crawler_painter.set_type(name, 'warning');
         else if( cont.find('td div.alert-info').length > 0 ) crawler_painter.set_type(name, 'info');
         else if( cont.find('td div.alert-success').length > 0 ) crawler_painter.set_type(name, 'success');
+
+        return undefined;
+    },
+
+    /**
+     * Add a row that only has a status
+     *
+     * @param {string} cont
+     * @param {string} type
+     * @param {string} string
+     * @return undefined
+     */
+    add_status_row: function(cont, type, string){
+        return crawler_painter.add_row(cont, [ this.create_status(type, string) ]);
     },
 
     /**
