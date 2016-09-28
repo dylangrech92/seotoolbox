@@ -26,8 +26,8 @@ class AutomatedLinkTest extends SapphireTest {
     public function testProperties(){
         $this->objFromFixture('AutomatedLink','link2');
 
-        $page   = $this->createPage('<p>Checking if properties is with correct props</p>');
-        $link   = $this->getLinkFromPage($page);
+        $page   = self::createPage('<p>Checking if properties is with correct props</p>');
+        $link   = self::getLinkFromPage($page);
 
         $this->assertTrue( $link->nodeValue === 'properties', 'Phrase did not match' );
         $this->assertTrue( $link->getAttribute('title') === 'test title', 'Title did not match' );
@@ -42,8 +42,8 @@ class AutomatedLinkTest extends SapphireTest {
     public function testDefaultProperties(){
         $this->objFromFixture('AutomatedLink','link3');
 
-        $page   = $this->createPage('<p>Checking if default is correct</p>');
-        $link   = $this->getLinkFromPage($page);
+        $page   = self::createPage('<p>Checking if default is correct</p>');
+        $link   = self::getLinkFromPage($page);
         $auto   = AutomatedLink::get()->find('Phrase', 'default');
 
         $this->assertTrue( $link->nodeValue === 'default', 'Phrase did not match' );
@@ -58,12 +58,32 @@ class AutomatedLinkTest extends SapphireTest {
      * Test that the default properties match what we expect
      */
     public function testLimitFilter(){
-        $this->objFromFixture('AutomatedLink','link3');
-
-        $page   = $this->createPage('<p>Checking if default is created only twice. default default</p>');
-        $dom    = $this->getPageDOM($page);
+        $page   = self::createPage('<p>Checking if default is created only twice. default default</p>');
+        $dom    = self::getPageDOM($page);
         $links  = $dom->getElementsByTagName('a');
         $this->assertTrue($links->length == 2, 'Was suppose to find 2 link. Found '.$links->length);
+    }
+
+    /**
+     * Test that the default properties match what we expect
+     */
+    public function testDisableFilter(){
+        GlobalAutoLinkSettings::$enabled = false;
+        $page   = self::createPage('<p>Checking if default is created at all when automated links are disabled.</p>');
+        $links  = self::getLinksFromPage($page);
+        $this->assertTrue($links->length < 1, 'Was not suppose to find 0 links. Found '.$links->length);
+        GlobalAutoLinkSettings::$enabled = true;
+    }
+
+    /**
+     * Renders the passed $page and returns all links found if any
+     *
+     * @param SiteTree $page
+     * @return DOMNameList
+     */
+    public static function getLinksFromPage(SiteTree $page){
+        $dom = self::getPageDOM($page);
+        return $dom->getElementsByTagName('a');
     }
 
     /**
@@ -74,10 +94,8 @@ class AutomatedLinkTest extends SapphireTest {
      * @param SiteTree $page
      * @return DOMDocument
      */
-    private function getLinkFromPage(SiteTree $page){
-        $dom = $this->getPageDOM($page);
-        $links = $dom->getElementsByTagName('a');
-        $this->assertTrue($links->length == 1, 'Didn\'t find the link that was suppose to be created');
+    public static function getLinkFromPage(SiteTree $page){
+        $links = self::getLinksFromPage($page);
         return ( $links->length != 1 ) ? new DOMElement() : $links->item(0);
     }
 
@@ -87,7 +105,7 @@ class AutomatedLinkTest extends SapphireTest {
      * @param string|null $content
      * @return Page
      */
-    private function createPage($content=null){
+    public static function createPage($content=null){
         $page = Page::create(array( 'Content' => $content ));
         $page->write();
         return $page;
@@ -99,7 +117,7 @@ class AutomatedLinkTest extends SapphireTest {
      * @param Page $page
      * @return DOMDocument
      */
-    private function getPageDOM(Page $page){
+    public static function getPageDOM(Page $page){
         $controller = Page_Controller::create($page);
         $controller->invokeWithExtensions('addAutomatedLinks');
         return AutomatedLink::constructDOMDocument($controller->Content);
