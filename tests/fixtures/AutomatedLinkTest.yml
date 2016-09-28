@@ -1,5 +1,5 @@
 AutomatedLink:
-  link1:
+  link:
     Phrase: phrase
     TitleTag: title 1
     NewWindow: 1
@@ -8,27 +8,11 @@ AutomatedLink:
     MaxLinksPerPage: 2
     Priority: 0
   link2:
-    Phrase: phrase with spaces
-    NewWindow: 1
-    SelfLinking: 0
-    CaseSensitive: 0
-    MaxLinksPerPage: 2
-    Priority: 1
-  title_and_anchor:
-    Phrase: title_phrase
-    TitleTag: Link has a pretty long title even though in most cases users will not input such a long title
-    AnchorTag: jump-to-id
-    SelfLinking: 0
-    CaseSensitive: 0
-    MaxLinksPerPage: 2
-    Priority: 2
-  limited:
-    Phrase: limited
-    TitleTag: title 1
-    AnchorTag:
+    Phrase: properties
+    TitleTag: test title
+    AnchorTag: test-anchor
     NewWindow: 1
     NoFollow: 1
-    SelfLinking: 0
-    CaseSensitive: 0
-    MaxLinksPerPage: 1
-    Priority: 0
+  link3:
+    Phrase: default
+    MaxLinksPerPage: 2

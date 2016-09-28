@@ -21,4 +21,7 @@ before_script:
   - cd ~/builds/ss
 
 script:
-  - vendor/bin/phpunit seotoolbox/tests/
+  - phpunit seotoolbox/tests
+
+notifications:
+  slack: innovativecodes:YoJEO1IutBmZV1E5wD8xrfDO
