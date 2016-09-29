@@ -2,6 +2,7 @@
 
 class SEOTestSiteTreeController extends Controller {
 
+    private static $alternate_domain    = null;
     private static $desktop_user_agent  = 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36';
     private static $mobile_user_agent   = 'Mozilla/5.0 (Linux; <Android Version>; <Build Tag etc.>) AppleWebKit/<WebKit Rev> (KHTML, like Gecko) Chrome/<Chrome Rev> Mobile Safari/<WebKit Rev>';
 
@@ -198,7 +199,7 @@ class SEOTestSiteTreeController extends Controller {
      */
     public function setupCurl($url, $agent, $useCrawlID = false){
         $ch = curl_init();
-        curl_setopt( $ch, CURLOPT_URL, Director::absoluteBaseURL().'/'.$url );
+        curl_setopt( $ch, CURLOPT_URL, $this->getCurlURL($url) );
         curl_setopt( $ch, CURLOPT_HEADER, true );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
         curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, true );
@@ -212,6 +213,28 @@ class SEOTestSiteTreeController extends Controller {
             curl_setopt( $ch, CURLOPT_HTTPHEADER, array( 'X-Crawl-Id: '.$crawl_id ) );
         }
         return $ch;
+    }
+
+    /**
+     * Return the domain to use to curl the page
+     *
+     * @return array|scalar|string
+     */
+    public function getCurlDomain(){
+        return ( self::config()->get('alternate_domain') != null )
+            ? self::config()->get('alternate_domain')
+            : Director::absoluteBaseURL();
+    }
+
+    /**
+     * Return a url ready to be curled
+     *
+     * @param string $url
+     * @return string
+     */
+    public function getCurlURL($url){
+        $domain = $this->getCurlDomain();
+        return "$domain/$url";
     }
 
     /**
@@ -251,7 +274,7 @@ class SEOTestSiteTreeController extends Controller {
     public function loadPage($url, $agent=null){
         $ch         = $this->setupCurl($url, $agent, true);
         $data       = curl_exec($ch);
-        $fetched    = parse_url(curl_getinfo($ch, CURLINFO_EFFECTIVE_URL), PHP_URL_PATH);
+        $fetched    = str_replace($this->getCurlDomain(), '', curl_getinfo($ch, CURLINFO_EFFECTIVE_URL));
         $header     = $this->getPageHeaders($ch, $data);
         $body       = preg_replace('/[\s]+/mu', ' ', $this->getPageBody($ch, $data));
 

@@ -88,8 +88,8 @@ const crawler_painter = {
     /**
      * Update the type of container named cont according to it's data
      *
-     * @param {string} cont
-     * @return undefined
+     * @param {string} name
+     * @return {jQuery|undefined}
      */
     set_type_by_data: function(name){
         var cont = this.get_container_by_name(name);
@@ -97,6 +97,7 @@ const crawler_painter = {
         else if( cont.find('td div.alert-warning').length > 0 ) return crawler_painter.set_type(name, 'warning');
         else if( cont.find('td div.alert-info').length > 0 ) return crawler_painter.set_type(name, 'info');
         else if( cont.find('td div.alert-success').length > 0 ) return crawler_painter.set_type(name, 'success');
+        return undefined;
     },
 
     /**
@@ -194,8 +195,6 @@ const crawler_painter = {
             case 'warning': return cont.addClass('yellow');
             default: return cont.addClass('purple');
         }
-
-        return undefined;
     },
 
     /**
