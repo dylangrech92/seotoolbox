@@ -240,13 +240,11 @@ const crawler = {
                     crawler.run_tests(url, html, result['headers'], result['field_data'], result['phrases']);
                     return crawler.trigger('CRAWL_AFTER_TESTS', [url]);
                 }else{
-                    crawler.failed.push(url);
-                    return crawler.trigger('CRAWL_LOAD_FAILED', [url]);
+                    return crawler.failed(url);
                 }
             })
             .fail( function(){
-                crawler.failed.push(url);
-                return crawler.trigger('CRAWL_LOAD_FAILED', [url]);
+                return crawler.failed_url(url);
             })
             .always( function(){
                 crawler.crawling.splice(crawler.crawling.indexOf(url), 1);
@@ -306,6 +304,7 @@ const crawler = {
      *
      * @param {string} event
      * @param {*} data
+     * return {undefined}
      */
     trigger: function(event, data){
         if(this.events.hasOwnProperty(event))
@@ -380,6 +379,17 @@ const crawler = {
         if(!this.hasOwnProperty(property)) this[property] = {};
         if(!this[property].hasOwnProperty(key)) this[property][key] = [val];
         else this[property][key].push(val);
+    },
+
+    /**
+     * Add the failed url to the failed list and trigger the failed event
+     *
+     * @param {string} url
+     * @returns {undefined}
+     */
+    failed_url: function(url){
+        this.failed.push(url);
+        return crawler.trigger('CRAWL_LOAD_FAILED', [url]);
     },
 
     /**

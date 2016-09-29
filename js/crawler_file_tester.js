@@ -74,26 +74,14 @@ const crawler_file_tester = {
         $.ajax({
             'url': crawler.get_proxy('/seotest/getPage?u='+url+'&agent='+crawler.agent)
         }).done(callback).fail(failed_callback);
-    },
-
-    /**
-     * Start testing the robots page
-     */
-    init_robots_tester: function(){
-
-
-
-    },
-
-
+    }
 };
 
 // Register the tests
 crawler.on('BEFORE_INIT', function(){
     crawler.regiser_test('file_tests', 'FILE TESTS', ['Status'], false);
     crawler.regiser_test('blocked_pages', 'BLOCKED PAGES', ['URL', 'Linked From', 'Blocked For', 'Blocked By', 'Status'], false);
-
-    crawler_painter.set_type('blocked_pages', 'success');
+    crawler_painter.set_type('blocked_pages', 'default');
 });
 
 // Start up the file testers

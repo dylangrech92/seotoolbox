@@ -2,10 +2,10 @@ const default_tests = {
 
     // [name, title, headers, type]
     tests: [
-        ['error_pages', 'ERROR PAGES', ['URL'], 'success'],
+        ['error_pages', 'ERROR PAGES', ['URL', 'Linked From'], ''],
         ['h1_info', 'H1 INFO', ['URL', 'Count', 'Text', 'Status']],
         ['h2_info', 'H2 INFO', ['URL', 'Count', 'Text', 'Status']],
-        ['word_count', 'WORD COUNT', ['URL', 'Word Count', 'Article Word Count']],
+        ['word_count', 'WORD COUNT', ['URL', 'Word Count', 'Article Word Count'], 'info'],
         ['int_link_info', 'INTERNAL LINKS',
             ['URL', 'Article Links', 'Article Link Count', 'Article Density', 'Total Link Count', 'Total Density', 'Status'],
             'info'],
@@ -16,9 +16,9 @@ const default_tests = {
         ['canonical_info', 'CANONICAL', ['URL', 'Status'], 'success'],
         ['noindex_pages', 'NO-INDEX PAGES', ['URL'], 'success'],
         ['urls_test', 'URL STRUCTURE', ['URL', 'Status'], 'success'],
-        ['duplicate_meta_tags', 'DUPLICATE META TAGS', ['URL', 'Status'], 'success'],
+        ['duplicate_meta_tags', 'DUPLICATE META TAGS', ['URL', 'Status']],
         ['href_langs', 'LANG TAGS', ['URL', 'Tags'], 'info'],
-        ['orphan_pages', 'ORPHAN PAGES', ['URL'], 'info']
+        ['orphan_pages', 'ORPHAN PAGES', ['URL']]
     ],
 
     /**
@@ -395,14 +395,9 @@ crawler.on('BEFORE_INIT', function(){
     }
 });
 
-// When a crawl fails add an error page
-crawler.on('CRAWL_LOAD_FAILED', function(url){
-    crawler_painter.add_row('error_pages', [url]);
-    crawler_painter.set_type('error_pages', 'error');
-});
-
 // When crawler is done check for orphan pages
 crawler.on('ALL_CRAWLS_FINISHED', function(){
+    crawler_painter.set_type('orphan_pages', 'success');
     pages_loop:
         for( var i in crawler.tested ){
             var url = crawler.tested[i];
@@ -425,6 +420,8 @@ crawler.on('ALL_CRAWLS_FINISHED', function(){
 
 // When crawler is done check for orphan pages
 crawler.on('ALL_CRAWLS_FINISHED', function(){
+    crawler_painter.set_type('duplicate_meta_tags', 'success');
+
     var canonicals = crawler.canonicals,
         tests      = {
             'meta_titles'   : 'Urls have same meta title but different canonicals',
@@ -442,6 +439,26 @@ crawler.on('ALL_CRAWLS_FINISHED', function(){
                     crawler_painter.add_row('duplicate_meta_tags', [urls.join(', '), status]);
                     break;
                 }
+        }
+    }
+
+    return undefined;
+});
+
+// When crawler is done check for orphan pages
+crawler.on('ALL_CRAWLS_FINISHED', function(){
+    crawler_painter.set_type('error_pages', 'success');
+    for(var f in crawler.failed){
+        var failed = crawler.failed[f];
+        if( crawler.linked_from.hasOwnProperty( failed ) ){
+            var linked_from = [];
+            for( var lf in crawler.linked_from[failed] ){
+                var link = crawler_painter.create_link(crawler.linked_from[failed][lf], crawler.linked_from[failed][lf]);
+                linked_from.push(link);
+            }
+
+            crawler_painter.add_row('error_pages', [failed, linked_from.join('<br />')]);
+            crawler_painter.set_type('error_pages', 'error');
         }
     }
 
