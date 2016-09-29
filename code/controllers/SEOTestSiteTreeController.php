@@ -5,10 +5,13 @@ class SEOTestSiteTreeController extends Controller {
     private static $desktop_user_agent  = 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36';
     private static $mobile_user_agent   = 'Mozilla/5.0 (Linux; <Android Version>; <Build Tag etc.>) AppleWebKit/<WebKit Rev> (KHTML, like Gecko) Chrome/<Chrome Rev> Mobile Safari/<WebKit Rev>';
 
-    // Array of regex that will be used by the crawler. If the url we're going to crawl matches any filter in here, it will be ignored
+    /**
+     * Array of regex that will be used by the crawler.
+     * If the url we're going to crawl matches any filter in here, it will be ignored
+     */
     private static $ignore_paths = array();
 
-    private static $allowed_actions = array('urlsAndSettings', 'getPageData');
+    private static $allowed_actions = array('urlsAndSettings', 'getPageData', 'getPage');
 
     public function init() {
         parent::init();
@@ -63,6 +66,29 @@ class SEOTestSiteTreeController extends Controller {
 
         Requirements::clear();
         return json_encode($curl);
+    }
+
+    /**
+     * Get the page contents of the requested url.
+     * This is used as a proxy so that users running the admin on a subdomain
+     * still get the data from their main domain
+     *
+     * @param SS_HTTPRequest $request
+     * @return string
+     */
+    public function getPage(SS_HTTPRequest $request){
+        $agent = ($request->getVar('agent') == 'mobile')
+            ? $this->config()->get('mobile_user_agent')
+            : $this->config()->get('desktop_user_agent');
+
+        $ch = $this->setupCurl($request->getVar('u'), $agent);
+        $data = curl_exec($ch);
+        $body = $this->getPageBody($ch, $data);
+        curl_close($ch);
+
+        Requirements::clear();
+
+        return $body;
     }
 
     /**
@@ -162,15 +188,15 @@ class SEOTestSiteTreeController extends Controller {
     }
 
     /**
-     * Curl the passed $url using the X-Crawl-ID header and parse the data
-     * into an array
+     * Setup a curl request
      *
-     * @param string        $url
-     * @param (null|string) $agent
-     * @return array
+     * @param string    $url
+     * @param string    $agent
+     * @param bool      $useCrawlID
+     *
+     * @return resource
      */
-    public function loadPage($url, $agent=null){
-        $crawl_id = GlobalAutoLinkSettings::get_current()->CrawlID;
+    public function setupCurl($url, $agent, $useCrawlID = false){
         $ch = curl_init();
         curl_setopt( $ch, CURLOPT_URL, Director::absoluteBaseURL().'/'.$url );
         curl_setopt( $ch, CURLOPT_HEADER, true );
@@ -181,15 +207,53 @@ class SEOTestSiteTreeController extends Controller {
         curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 10 );
         curl_setopt( $ch, CURLOPT_TIMEOUT, 30 );
         curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-        curl_setopt( $ch, CURLOPT_HTTPHEADER, array( 'X-Crawl-Id: '.$crawl_id ) );
-        $data = curl_exec( $ch );
+        if( $useCrawlID ){
+            $crawl_id = GlobalAutoLinkSettings::get_current()->CrawlID;
+            curl_setopt( $ch, CURLOPT_HTTPHEADER, array( 'X-Crawl-Id: '.$crawl_id ) );
+        }
+        return $ch;
+    }
 
-        $fetched        = parse_url(curl_getinfo($ch, CURLINFO_EFFECTIVE_URL), PHP_URL_PATH);
+    /**
+     * Get the page headers from a curl response
+     *
+     * @param resource  $ch
+     * @param string    $data
+     * @return string
+     */
+    public function getPageHeaders($ch, $data){
         $header_size    = curl_getinfo( $ch, CURLINFO_HEADER_SIZE );
         $header 	    = explode( "\r\n\r\n", substr( $data, 0, $header_size ) );
         array_pop( $header ); // Remove last element as it will always be empty
-        $header = array_pop( $header );
-        $body   = preg_replace('/[\s]+/mu', ' ', substr( $data, $header_size ));
+        return array_pop( $header );
+    }
+
+    /**
+     * Get the body of a curl response
+     *
+     * @param resource  $ch
+     * @param string    $data
+     * @return string
+     */
+    public function getPageBody($ch, $data){
+        $header_size = curl_getinfo( $ch, CURLINFO_HEADER_SIZE );
+        return substr( $data, $header_size );
+    }
+
+    /**
+     * Curl the passed $url using the X-Crawl-ID header and parse the data
+     * into an array
+     *
+     * @param string        $url
+     * @param (null|string) $agent
+     * @return array
+     */
+    public function loadPage($url, $agent=null){
+        $ch         = $this->setupCurl($url, $agent, true);
+        $data       = curl_exec($ch);
+        $fetched    = parse_url(curl_getinfo($ch, CURLINFO_EFFECTIVE_URL), PHP_URL_PATH);
+        $header     = $this->getPageHeaders($ch, $data);
+        $body       = preg_replace('/[\s]+/mu', ' ', $this->getPageBody($ch, $data));
 
         curl_close( $ch );
 

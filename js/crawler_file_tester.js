@@ -9,9 +9,8 @@ const crawler_file_tester = {
      * @throws {Exception}
      */
     parse_robots_file: function(result){
-        var rules   = result.split("\n"),
-            status  = crawler_painter.create_status('success', 'Robots file loaded');
-        crawler_painter.add_row('file_tests', [ status, result.replace(/(?:\r\n|\r|\n)/g, '<br />') ]);
+        var rules = result.split("\n");
+        crawler_painter.add_row('file_tests', [ crawler_painter.create_status('success', 'Robots file loaded') ]);
 
         var agent = '*';
         for(var r in rules){
@@ -35,17 +34,6 @@ const crawler_file_tester = {
                 throw "Found a rule which we don't understand. Report it to the developer";
             }
         }
-    },
-
-    /**
-     * Check if the given url is blocked by the robot rules we have
-     *
-     * @param {string} url
-     * @returns {boolean|string}
-     */
-    is_blocked_in: function(url){
-
-        return false;
     },
 
     /**
@@ -75,35 +63,51 @@ const crawler_file_tester = {
         return undefined;
     },
 
-    get_file_contents: function(url, type, callback, failed_callback){
-        $.ajax({ 'url' : url, 'dataType' : type }).done(callback).fail(failed_callback);
+    /**
+     * Setup an ajax call to fetch url
+     *
+     * @param {string} url
+     * @param {function} callback
+     * @param {function} failed_callback
+     */
+    get_file_contents: function(url, callback, failed_callback){
+        $.ajax({
+            'url': crawler.get_proxy('/seotest/getPage?u='+url+'&agent='+crawler.agent)
+        }).done(callback).fail(failed_callback);
     },
 
     /**
      * Start testing the robots page
      */
     init_robots_tester: function(){
-        crawler.regiser_test('blocked_pages', 'BLOCKED PAGES', ['URL', 'Linked From', 'Blocked For', 'Blocked By', 'Status'], false);
-        crawler_painter.set_type('blocked_pages', 'success');
 
-        this.get_file_contents( crawler.robots_url, 'text', this.parse_robots_file, function(){
-            crawler_painter.add_status_row('file_tests', 'error', 'Failed to load robots file');
-        });
 
-        crawler.on('CRAWL_FINISHED', function(){
-           if( crawler.que.length < 1 ){
-               crawler_file_tester.test_blocked_pages();
-           }
-        });
+
     },
 
 
 };
 
-// Start up the file tester
+// Register the tests
 crawler.on('BEFORE_INIT', function(){
-    crawler.regiser_test('file_tests', 'FILE TESTS', ['Status', 'Content'], false);
-    crawler_file_tester.init_robots_tester();
+    crawler.regiser_test('file_tests', 'FILE TESTS', ['Status'], false);
+    crawler.regiser_test('blocked_pages', 'BLOCKED PAGES', ['URL', 'Linked From', 'Blocked For', 'Blocked By', 'Status'], false);
+
+    crawler_painter.set_type('blocked_pages', 'success');
+});
+
+// Start up the file testers
+crawler.on('AFTER_INIT', function(){
+    crawler_file_tester.get_file_contents(
+        crawler.robots_url,
+        crawler_file_tester.parse_robots_file,
+        function(){ crawler_painter.add_status_row('file_tests', 'error', 'Failed to load robots file'); }
+    );
     //crawler_file_tester.init_sitemap_tester();
+});
+
+// Test for blocked pages the the crawler finishes
+crawler.on('ALL_CRAWLS_FINISHED', function(){
+    crawler_file_tester.test_blocked_pages();
 });
 

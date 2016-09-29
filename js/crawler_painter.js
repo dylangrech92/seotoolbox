@@ -82,14 +82,21 @@ const crawler_painter = {
         }
 
         cont.find('.count').html(len);
+        return this.set_type_by_data(name);
+    },
 
-        // Set the header colour
-        if( cont.find('td div.alert-danger').length > 0 ) crawler_painter.set_type(name, 'error');
-        else if( cont.find('td div.alert-warning').length > 0 ) crawler_painter.set_type(name, 'warning');
-        else if( cont.find('td div.alert-info').length > 0 ) crawler_painter.set_type(name, 'info');
-        else if( cont.find('td div.alert-success').length > 0 ) crawler_painter.set_type(name, 'success');
-
-        return undefined;
+    /**
+     * Update the type of container named cont according to it's data
+     *
+     * @param {string} cont
+     * @return undefined
+     */
+    set_type_by_data: function(name){
+        var cont = this.get_container_by_name(name);
+        if( cont.find('td div.alert-danger').length > 0 ) return crawler_painter.set_type(name, 'error');
+        else if( cont.find('td div.alert-warning').length > 0 ) return crawler_painter.set_type(name, 'warning');
+        else if( cont.find('td div.alert-info').length > 0 ) return crawler_painter.set_type(name, 'info');
+        else if( cont.find('td div.alert-success').length > 0 ) return crawler_painter.set_type(name, 'success');
     },
 
     /**
@@ -174,10 +181,12 @@ const crawler_painter = {
      *
      * @param {string} name
      * @param {string} type
+     * @return undefined
      */
     set_type: function(name, type){
         var cont = this.get_container_by_name(name);
         cont.removeClass('blue red green yellow purple');
+
         switch(type){
             case 'info': return cont.addClass('blue');
             case 'error': return cont.addClass('red');
@@ -185,6 +194,8 @@ const crawler_painter = {
             case 'warning': return cont.addClass('yellow');
             default: return cont.addClass('purple');
         }
+
+        return undefined;
     },
 
     /**

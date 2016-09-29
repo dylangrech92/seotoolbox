@@ -9,6 +9,7 @@ const crawler = {
     crawl_id        : undefined,
     events          : {},
     linked_from     : {},
+    redirects       : {},
     useragent       : 'desktop',
 
     /**
@@ -147,8 +148,8 @@ const crawler = {
      */
     can_crawl: function(url){
         if(url == undefined) return false;
-        return !(this.crawling.indexOf(url) >= 0 || this.tested.indexOf(url) >= 0 ||
-                    this.is_file(url) || this.ignore_url(url) || this.is_external(url));
+        return this.crawling.indexOf(url) < 0 && this.tested.indexOf(url) < 0 && this.que.indexOf(url) < 0 &&
+                !this.is_file(url) && !this.ignore_url(url) && !this.is_external(url);
     },
 
     /**
@@ -193,6 +194,24 @@ const crawler = {
     },
 
     /**
+     * Check if that target we requested matches the response we got.
+     * If not mark as a redirect and append the redirect to be crawled
+     *
+     * @param {string} target
+     * @param {string} response
+     * @return {boolean}
+     */
+    check_fetched_url: function(target, response){
+        if(target != response){
+            this.redirects[target] = response;
+            this.que_url(response);
+            return false;
+        }
+
+        return true;
+    },
+
+    /**
      * Fetch the next url from the que and run the tests on it
      */
     fetch_and_test: function(){
@@ -201,36 +220,48 @@ const crawler = {
         var url = this.que.pop();
         this.crawling.push(url);
 
-        $.ajax({ url: this.get_proxy( url ), data: { agent: this.useragent }, accepts: 'json', dataType: 'json' })
+        $.ajax({
+            url: this.get_proxy( '/seotest/getPageData?u='+url ),
+            data: { agent: this.useragent },
+            accepts: 'json',
+            dataType: 'json'
+        })
             .done(function( result ) {
                 if(result['headers'] && result['body'] && result['body'].toLowerCase().indexOf('<head') >= 0) {
-                    if( !crawler.is_external(result['url_fetched']) ) {
-                        url = crawler.sanitize(result['url_fetched']);
-                        if(crawler.tested.indexOf(url) >= 0){
-                            this.skipped = true;
-                            return true;
-                        }
-
-                        var html = $(crawler.strip_img_src(result['body']));
-                        crawler.trigger('CRAWL_BEFORE_TESTS', [url]);
-                        crawler.fetch_links(html, url);
-                        crawler.run_tests(url, html, result['headers'], result['field_data'], result['phrases']);
-                        crawler.trigger('CRAWL_AFTER_TESTS', [url]);
-                        return true;
+                    var fetched = crawler.sanitize(result['url_fetched']);
+                    if(!crawler.check_fetched_url(url, fetched)){
+                        this.skipped = true;
+                        return crawler.trigger('CRAWL_FOUND_REDIRECT', [url, fetched]);
                     }
+
+                    var html = $(crawler.strip_img_src(result['body']));
+                    crawler.trigger('CRAWL_BEFORE_TESTS', [url]);
+                    crawler.fetch_links(html, url);
+                    crawler.run_tests(url, html, result['headers'], result['field_data'], result['phrases']);
+                    return crawler.trigger('CRAWL_AFTER_TESTS', [url]);
+                }else{
+                    crawler.failed.push(url);
+                    return crawler.trigger('CRAWL_LOAD_FAILED', [url]);
                 }
-                crawler.failed.push(url);
-                return crawler.trigger('CRAWL_LOAD_FAILED', [url]);
             })
             .fail( function(){
                 crawler.failed.push(url);
                 return crawler.trigger('CRAWL_LOAD_FAILED', [url]);
             })
             .always( function(){
-                if((this.hasOwnProperty('skipped') && this.skipped) || crawler.tested.indexOf(url) < 0 ) {
-                    crawler.tested.push(url)
+                crawler.crawling.splice(crawler.crawling.indexOf(url), 1);
+
+                if(!this.hasOwnProperty('skipped')){
+                    crawler.tested.push(url);
                 }
-                return crawler.trigger('CRAWL_FINISHED', [url]);
+
+                crawler.trigger('CRAWL_FINISHED', [url]);
+
+                if( crawler.que.length < 1 && crawler.crawling.length < 1){
+                    crawler.trigger('ALL_CRAWLS_FINISHED', []);
+                }
+
+                return crawler.fetch_and_test();
             });
     },
 
@@ -307,11 +338,11 @@ const crawler = {
     /**
      * Return the proxy url to test the passed url
      *
-     * @param {$string} url
+     * @param {string} url
      * @returns {string}
      */
     get_proxy: function(url){
-        return location.protocol + '//' + location.hostname + '/seotest/getPageData?u='+url;
+        return location.protocol + '//' + location.hostname + url;
     },
 
     /**
@@ -365,14 +396,8 @@ const crawler = {
 
         if( !this.crawl_id ) throw "crawl_id must be specified";
 
-        // When a crawl finishes, start a new one if there are any more urls to go through else stop the auto-restart
-        this.on('CRAWL_FINISHED', function(){
-            if( crawler.que.length > 0 ) crawler.fetch_and_test();
-            else window.clearInterval(crawler.interval);
-        });
-
-        // Every second try to initialize a new crawl request just in-case something crashes
-        this.interval = setInterval(function(){ crawler.fetch_and_test(); }, 1000);
+        crawler.fetch_and_test();
+        crawler.fetch_and_test();
 
         crawler_painter.init();
         this.trigger('AFTER_INIT', []);

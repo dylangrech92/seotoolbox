@@ -356,8 +356,7 @@ crawler.on('CRAWL_LOAD_FAILED', function(url){
     crawler_painter.set_type('error_pages', 'error');
 });
 
-crawler.on('CRAWL_FINISHED', function(){
-    if(crawler.que.length > 0) return true;
+crawler.on('ALL_CRAWLS_FINISHED', function(){
     crawler_painter.reset_table('orphan_pages', 'success');
 
     pages_loop:
