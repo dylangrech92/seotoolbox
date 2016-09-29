@@ -240,7 +240,7 @@ const crawler = {
                     crawler.run_tests(url, html, result['headers'], result['field_data'], result['phrases']);
                     return crawler.trigger('CRAWL_AFTER_TESTS', [url]);
                 }else{
-                    return crawler.failed(url);
+                    return crawler.failed_url(url);
                 }
             })
             .fail( function(){

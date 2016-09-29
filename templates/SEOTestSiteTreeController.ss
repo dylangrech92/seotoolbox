@@ -39,6 +39,32 @@
                     </div>
                 </div>
             </div>
+            <div class="legend-toggle text-white text-left legend-btn" style="display:none">
+                LEGEND
+            </div>
+            <div id="legend" style="display:none">
+                <div class="header">
+                    <h2 class="bg-dark text-center">Legend</h2>
+                </div>
+                <div class="item red text-white text-left">
+                    <span class="glyphicon glyphicon-exclamation-sign">&nbsp;</span>URGENT ISSUE
+                </div>
+                <div class="item yellow text-white text-left">
+                    <span class="glyphicon glyphicon-warning-sign">&nbsp;</span>WARNING
+                </div>
+                <div class="item blue text-white text-left">
+                    <span class="glyphicon glyphicon-info-sign">&nbsp;</span>INFORMATION
+                </div>
+                <div class="item green text-white text-left">
+                    <span class="glyphicon glyphicon-ok">&nbsp;</span>SUCCESS
+                </div>
+                <div class="item purple text-white text-left">
+                    <span class="glyphicon glyphicon-hourglass">&nbsp;</span>LOADING
+                </div>
+                <div class="legend-toggle text-white text-right">
+                    <span class="glyphicon glyphicon-arrow-left">&nbsp;</span>
+                </div>
+            </div>
             <div class="wrapper container-default container-fluid" id="results_container" style="display:none">
                 <div class="header main-header">
                     <h1 class="text-center">SEO Toolbox Site Analysis</h1>
@@ -58,6 +84,14 @@
                                     <td class="text-left" id="analyzestatus">Loading Pages</td>
                                 </tr>
                             </tbody>
+                        </table>
+                        <table class="table bg-dark">
+                            <thead>
+                                <tr>
+                                    <th id="robots-check"><strong>Robots</strong> </th>
+                                    <th id="sitemap-check"><strong>Sitemap</strong> </th>
+                                </tr>
+                            </thead>
                         </table>
                     </div>
                 </div>

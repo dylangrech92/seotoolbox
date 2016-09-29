@@ -10,7 +10,7 @@ const crawler_file_tester = {
      */
     parse_robots_file: function(result){
         var rules = result.split("\n");
-        crawler_painter.add_row('file_tests', [ crawler_painter.create_status('success', 'Robots file loaded') ]);
+        $('#robots-check').addClass('text-success').append('<span class="glyphicon glyphicon-ok-circle">&nbsp;</span>');
 
         var agent = '*';
         for(var r in rules){
@@ -79,7 +79,6 @@ const crawler_file_tester = {
 
 // Register the tests
 crawler.on('BEFORE_INIT', function(){
-    crawler.regiser_test('file_tests', 'FILE TESTS', ['Status'], false);
     crawler.regiser_test('blocked_pages', 'BLOCKED PAGES', ['URL', 'Linked From', 'Blocked For', 'Blocked By', 'Status'], false);
     crawler_painter.set_type('blocked_pages', 'default');
 });
@@ -89,7 +88,7 @@ crawler.on('AFTER_INIT', function(){
     crawler_file_tester.get_file_contents(
         crawler.robots_url,
         crawler_file_tester.parse_robots_file,
-        function(){ crawler_painter.add_status_row('file_tests', 'error', 'Failed to load robots file'); }
+        function(){ $('#robots-check').addClass('text-danger').append('<span class="glyphicon glyphicon-remove-circle">&nbsp;</span>'); }
     );
     //crawler_file_tester.init_sitemap_tester();
 });

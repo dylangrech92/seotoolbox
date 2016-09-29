@@ -16,15 +16,18 @@ body,html{background: #222a2d;font-family:'Lato';}
 .infobox .header .icon{font-size: 24px;padding: 10px 10px 0 0;cursor: pointer;}
 .infobox .count{font-weight:900;font-size:18px;padding:0 20px;line-height:50px;}
 .infobox thead{color:#FFF}
-.infobox.purple .header, .infobox.purple thead{background:#80718e}
+.infobox.purple .header, .infobox.purple thead, #legend .item.purple{background:#80718e}
 .infobox.purple .header .count{background:#564769}
-.infobox.red .header, .infobox.red thead{background:#903d3d}
+.infobox.red .header, .infobox.red thead, #legend .item.red{background:#903d3d}
 .infobox.red .header .count{background:#733535}
-.infobox.green .header, .infobox.green thead{background:#3d9057}
+.infobox.green .header, .infobox.green thead, #legend .item.green{background:#3d9057}
 .infobox.green .header .count{background:#236538}
-.infobox.blue .header, .infobox.blue thead{background:#458e9a}
+.infobox.blue .header, .infobox.blue thead, #legend .item.blue{background:#458e9a}
 .infobox.blue .header .count{background:#33656d}
-.infobox.yellow .header, .infobox.yellow thead{background:#caa12e}
+.infobox.yellow .header, .infobox.yellow thead, #legend .item.yellow{background:#caa12e}
 .infobox.yellow .header .count{background:#927420}
 .infobox .status-text{padding:2px 10px;float:left;margin:0}
 .infobox .table td{vertical-align:middle;word-wrap: break-word;word-break: break-all;min-width: 150px;}
+#legend{width: 185px;position:fixed;top: 50px;left: 0;z-index:100;background:#273135;padding: 5px;cursor:pointer}
+#legend .item{padding:5px 10px;margin:5px 0}
+.legend-btn{position:fixed;top:100px;left:0px;width:35px;word-break:break-all;padding:5px 10px;background:#273135;font-weight:bold;border:solid 1px #415056;border-radius:0 10px 10px 0;cursor:pointer;}

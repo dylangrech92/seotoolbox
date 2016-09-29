@@ -18,6 +18,12 @@
 
                 $('#init-popup').hide();
                 $('#results_container').fadeIn();
+                $('.legend-btn').fadeIn();
+
+                $('.legend-btn, #legend').click(function(){
+                    $('#legend-btn').toggle();
+                    $('#legend').toggle();
+                })
             });
         }
     });
