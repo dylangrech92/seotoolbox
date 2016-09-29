@@ -11,13 +11,6 @@
                 crawler.sitemap_url = $('#sitemap-url').val();
                 crawler.useragent   = $('#user-agent').val();
 
-                // Register the default tests
-                for( var i in default_tests ){
-                    var test = default_tests[i];
-                    crawler.regiser_test(test.name, test.title, test.headers, test.callback);
-                    crawler_painter.set_type(test.name, test.type);
-                }
-
                 // Que initial urls
                 for( var j in result['urls'] ) crawler.que_url(result['urls'][j]);
 

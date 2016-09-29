@@ -296,7 +296,7 @@ const crawler = {
     run_tests: function(url, html, headers, field_data, phrases){
         for(var t in this.tests) {
             this.trigger('before'+this.tests[t]['name'], [url, html, headers, field_data, phrases]);
-            this.tests[t]['callback'].apply(this.tests[t], [this.tests[t]['cont'], url, html, headers, field_data, phrases]);
+            this.tests[t]['callback'].apply(this.tests[t], [url, html, headers, field_data, phrases]);
             this.trigger('after'+this.tests[t]['name'], [url, html, headers, field_data, phrases]);
         }
     },

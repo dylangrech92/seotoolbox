@@ -89,14 +89,14 @@ const crawler_painter = {
      * Update the type of container named cont according to it's data
      *
      * @param {string} name
-     * @return {jQuery|undefined}
+     * @return {undefined}
      */
     set_type_by_data: function(name){
         var cont = this.get_container_by_name(name);
-        if( cont.find('td div.alert-danger').length > 0 ) return crawler_painter.set_type(name, 'error');
-        else if( cont.find('td div.alert-warning').length > 0 ) return crawler_painter.set_type(name, 'warning');
-        else if( cont.find('td div.alert-info').length > 0 ) return crawler_painter.set_type(name, 'info');
-        else if( cont.find('td div.alert-success').length > 0 ) return crawler_painter.set_type(name, 'success');
+        if( cont.find('td div.alert-danger').length > 0 ) crawler_painter.set_type(name, 'error');
+        else if( cont.find('td div.alert-warning').length > 0 ) crawler_painter.set_type(name, 'warning');
+        else if( cont.find('td div.alert-info').length > 0 ) crawler_painter.set_type(name, 'info');
+        else if( cont.find('td div.alert-success').length > 0 ) crawler_painter.set_type(name, 'success');
         return undefined;
     },
 
@@ -110,25 +110,6 @@ const crawler_painter = {
      */
     add_status_row: function(cont, type, string){
         return crawler_painter.add_row(cont, [ this.create_status(type, string) ]);
-    },
-
-    /**
-     * Reset the data inside of the table for the container named {name}
-     *
-     * @param {string} name
-     * @param {string|undefined} type
-     * @return undefined
-     */
-    reset_table: function(name, type){
-        var cont = this.get_container_by_name(name);
-
-        cont.find('tbody tr').remove();
-        cont.find('.count').html('');
-        cont.find('.icon').hide();
-
-        if( type != undefined ) this.set_type(name, type);
-
-        return undefined;
     },
 
     /**
