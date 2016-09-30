@@ -20,6 +20,7 @@ const default_tests = {
         ['href_langs', 'LANG TAGS', ['URL', 'Tags'], 'info'],
         ['orphan_pages', 'ORPHAN PAGES', ['URL']],
         ['redirect_links', 'REDIRECT LINKS', ['Link', 'In', 'Redirects To']],
+        ['social_tests', 'SOCIAL', ['URL', 'Status']]
     ],
 
     /**
@@ -317,6 +318,61 @@ const default_tests = {
         });
 
         if( tags.length > 0 ) crawler.painter.add_row(this.name, [link, tags.join('<br />')] );
+
+        return undefined;
+    },
+
+    /**
+     * Test for social markup on the page provided
+     *
+     * @param {string} url
+     * @param {jQuery} html
+     * @returns {undefined}
+     */
+    social_tests: function(url, html){
+        var errors  = [],
+            link    = crawler.painter.create_link(url, url),
+            fb_tags = {
+                'og:title': 'Open Graph Title (og:title)',
+                'og:type': 'Open Graph Type (og:type)',
+                'og:image': 'Open Graph Image (og:image)',
+                'og:url': 'Open Graph URL (og:url)',
+                'og:description': 'Open Graph Description (og:description)',
+                'og:locale': 'Open Graph Language (og:locale)',
+                'og:site_name': 'Open Graph Site Name (og:site_name)'
+            },
+            twitter_cards = {
+                'twitter:card': 'Twitter Card Type (twitter:card)',
+                'twitter:site': 'Twitter Site @username (twitter:site)'
+            };
+
+        // OG Tags
+        for( var f in fb_tags ){
+            if( default_tests.get_tags(html, 'meta', 'property', f).length != 1 ){
+                errors.push( "Missing/Multiple "+ fb_tags[f] );
+            }
+        }
+
+        // Twitter Cards
+        for( var t in twitter_cards ){
+            if( default_tests.get_tags(html, 'meta', 'name', t).length != 1 ){
+                errors.push( "Missing/Multiple "+ twitter_cards[t] );
+            }
+        }
+
+        // Google Publisher
+        if( default_tests.get_tags(html, 'link', 'rel', 'publisher').length != 1 ){
+            errors.push( 'Missing / Multiple publisher tag' );
+        }
+
+        if( errors.length > 0 ){
+            var errs = [];
+            for( var e in errors ){
+                errs.push( $('<p class="row clearfix"></p>').append(errors[e]) );
+            }
+            crawler.painter.add_row(this.name, [link, errs]);
+            crawler.painter.set_type(this.name, 'warning');
+        }
 
         return undefined;
     },
