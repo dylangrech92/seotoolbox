@@ -479,7 +479,7 @@ crawler.event_handler.on('ALL_CRAWLS_FINISHED', function(){
         for( var i in crawler.tested ){
             var url = crawler.tested[i];
 
-            if( crawler.failed.indexOf(url) >= 0 ){
+            if( crawler.failed.indexOf(url) >= 0 || crawler.sitemap.indexOf(url) >= 0 ){
                 continue;
             }
 
