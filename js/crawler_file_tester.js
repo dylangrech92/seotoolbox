@@ -49,10 +49,10 @@ const crawler_file_tester = {
                 for (var r in this.robot_rules) {
                     var regex = new RegExp(this.robot_rules[r]['rule'], 'g');
                     if (regex.test('/' + url)) {
-                        var link    = crawler_painter.create_link(url, url),
-                            status  = crawler_painter.create_status('error', 'Page has links and is blocked in robots'),
+                        var link    = crawler.painter.create_link(url, url),
+                            status  = crawler.painter.create_status('error', 'Page has links and is blocked in robots'),
                             agent   = ( this.robot_rules[r]['agent'] == '*' ) ? 'ALL BOTS' : this.robot_rules[r]['agent'];
-                        crawler_painter.add_row(
+                        crawler.painter.add_row(
                             'blocked_pages',
                             [link, crawler.linked_from[url].join(', '), agent, this.robot_rules[r]['original'], status]);
                     }
@@ -78,13 +78,13 @@ const crawler_file_tester = {
 };
 
 // Register the tests
-crawler.on('BEFORE_INIT', function(){
+crawler.event_handler.on('BEFORE_INIT', function(){
     crawler.regiser_test('blocked_pages', 'BLOCKED PAGES', ['URL', 'Linked From', 'Blocked For', 'Blocked By', 'Status'], false);
-    crawler_painter.set_type('blocked_pages', 'default');
+    crawler.painter.set_type('blocked_pages', 'default');
 });
 
 // Start up the file testers
-crawler.on('AFTER_INIT', function(){
+crawler.event_handler.on('AFTER_INIT', function(){
     crawler_file_tester.get_file_contents(
         crawler.robots_url,
         crawler_file_tester.parse_robots_file,
@@ -94,7 +94,7 @@ crawler.on('AFTER_INIT', function(){
 });
 
 // Test for blocked pages the the crawler finishes
-crawler.on('ALL_CRAWLS_FINISHED', function(){
+crawler.event_handler.on('ALL_CRAWLS_FINISHED', function(){
     crawler_file_tester.test_blocked_pages();
 });
 

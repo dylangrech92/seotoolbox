@@ -7,10 +7,11 @@ const crawler = {
     tests           : [],
     ignore_paths    : [],
     crawl_id        : undefined,
-    events          : {},
     linked_from     : {},
     redirects       : {},
     useragent       : 'desktop',
+    event_handler   : crawler_event_handler,
+    painter         : crawler_painter,
 
     /**
      * Register a test to run.
@@ -26,8 +27,8 @@ const crawler = {
         if(name == undefined || this.get_test_by_name(name)) throw 'Invalid name specified for your test';
         if(title == undefined) throw 'Title not specified';
         if(!(headers instanceof Array) || headers.length < 1) throw 'Headers array is invalid';
-        if(typeof callable != 'function') return crawler_painter.create(name, title, headers);
-        this.tests.push({name: name, title: title, callback: callable, cont:crawler_painter.create(name, title, headers)});
+        if(typeof callable != 'function') return this.painter.create(name, title, headers);
+        this.tests.push({name: name, title: title, callback: callable, cont: this.painter.create(name, title, headers)});
         return undefined;
     },
 
@@ -103,18 +104,6 @@ const crawler = {
             if( url.match(reg) != null ) return true;
         }
         return false;
-    },
-
-    /**
-     * Add a path to ignore when crawler
-     * Note: Paths can be in regex format
-     *
-     * @param {string} path
-     * @returns {crawler}
-     */
-    add_ignore_path: function(path){
-        this.ignore_paths.push(path);
-        return this;
     },
 
     /**
@@ -212,6 +201,16 @@ const crawler = {
     },
 
     /**
+     * Checks if the string passed is an html page
+     *
+     * @param {string} html
+     * @returns {boolean}
+     */
+    is_html: function(html){
+        return html.indexOf('<head') > 0 && html.indexOf('<body') > 0;
+    },
+
+    /**
      * Fetch the next url from the que and run the tests on it
      */
     fetch_and_test: function(){
@@ -227,20 +226,18 @@ const crawler = {
             dataType: 'json'
         })
             .done(function( result ) {
-                if(result['headers'] && result['body'] && result['body'].toLowerCase().indexOf('<head') >= 0) {
-                    var fetched = crawler.sanitize(result['url_fetched']);
-                    if(!crawler.check_fetched_url(url, fetched)){
-                        this.skipped = true;
-                        return crawler.trigger('CRAWL_FOUND_REDIRECT', [url, fetched]);
-                    }
-
-                    var html = $(crawler.strip_img_src(result['body']));
-                    crawler.trigger('CRAWL_BEFORE_TESTS', [url]);
-                    crawler.fetch_links(html, url);
-                    crawler.run_tests(url, html, result['headers'], result['field_data'], result['phrases']);
-                    return crawler.trigger('CRAWL_AFTER_TESTS', [url]);
-                }else{
+                var fetched = crawler.sanitize(result['url_fetched']);
+                if( !result['headers'] || !result['body'] ) {
                     return crawler.failed_url(url);
+                }else if(!crawler.check_fetched_url(url, fetched)){
+                    this.skipped = true;
+                    return crawler.event_handler.trigger('CRAWL_FOUND_REDIRECT', [url, fetched]);
+                }else if(crawler.is_html(result['body'])){
+                    var html = $(crawler.strip_img_src(result['body']));
+                    crawler.fetch_links(html, url);
+                    return crawler.run_tests(url, html, result['headers'], result['field_data'], result['phrases']);
+                }else{
+                    this.skipped = true;
                 }
             })
             .fail( function(){
@@ -253,10 +250,10 @@ const crawler = {
                     crawler.tested.push(url);
                 }
 
-                crawler.trigger('CRAWL_FINISHED', [url]);
+                crawler.event_handler.trigger('CRAWL_FINISHED', [url]);
 
                 if( crawler.que.length < 1 && crawler.crawling.length < 1){
-                    crawler.trigger('ALL_CRAWLS_FINISHED', []);
+                    crawler.event_handler.trigger('ALL_CRAWLS_FINISHED', []);
                 }
 
                 return crawler.fetch_and_test();
@@ -290,37 +287,16 @@ const crawler = {
      * @param {Array} headers
      * @param {Array} field_data
      * @param {Array} phrases
+     * @returns {undefined}
      */
     run_tests: function(url, html, headers, field_data, phrases){
+        this.event_handler.trigger('CRAWL_BEFORE_TESTS', [url]);
         for(var t in this.tests) {
-            this.trigger('before'+this.tests[t]['name'], [url, html, headers, field_data, phrases]);
+            this.event_handler.trigger('before'+this.tests[t]['name'], [url, html, headers, field_data, phrases]);
             this.tests[t]['callback'].apply(this.tests[t], [url, html, headers, field_data, phrases]);
-            this.trigger('after'+this.tests[t]['name'], [url, html, headers, field_data, phrases]);
+            this.event_handler.trigger('after'+this.tests[t]['name'], [url, html, headers, field_data, phrases]);
         }
-    },
-
-    /**
-     * Trigger event callback and pass on the data
-     *
-     * @param {string} event
-     * @param {*} data
-     * return {undefined}
-     */
-    trigger: function(event, data){
-        if(this.events.hasOwnProperty(event))
-            for(var e in this.events[event]) this.events[event][e].apply(this, data);
-    },
-
-    /**
-     * Register callback on action
-     *
-     * @param {string} event
-     * @param {function} callback
-     * @returns {crawler}
-     */
-    on: function(event, callback){
-        if(!this.events.hasOwnProperty(event)) this.events[event] = [];
-        this.events[event].push(callback);
+        return this.event_handler.trigger('CRAWL_AFTER_TESTS', [url]);
     },
 
     /**
@@ -342,15 +318,6 @@ const crawler = {
      */
     get_proxy: function(url){
         return location.protocol + '//' + location.hostname + url;
-    },
-
-    /**
-     * @see crawler_painter.add_row(name, data)
-     * @param {string} name
-     * @param {Array} data
-     */
-    add_row: function(name, data){
-        crawler_painter.add_row(name, data);
     },
 
     /**
@@ -389,7 +356,18 @@ const crawler = {
      */
     failed_url: function(url){
         this.failed.push(url);
-        return crawler.trigger('CRAWL_LOAD_FAILED', [url]);
+        return this.event_handler.trigger('CRAWL_LOAD_FAILED', [url]);
+    },
+
+    /**
+     * Triggered every second
+     *
+     * @returns {undefined}
+     */
+    loop: function(){
+        this.event_handler.trigger('CRAWLER_LOOP', [this]);
+        this.fetch_and_test();
+        return undefined;
     },
 
     /**
@@ -399,17 +377,17 @@ const crawler = {
      * @throws Exception
      */
     init: function(settings){
-        this.trigger('BEFORE_INIT', []);
+        this.event_handler.trigger('BEFORE_INIT', [this]);
 
         if(settings.hasOwnProperty('crawl_id')) this.set_crawl_id(settings['crawl_id']);
         if(settings.hasOwnProperty('ignore_paths')) this.set_ignore_paths(settings['ignore_paths']);
 
         if( !this.crawl_id ) throw "crawl_id must be specified";
 
-        crawler.fetch_and_test();
-        crawler.fetch_and_test();
+        this.interval = setInterval(function(){crawler.loop();}, 1000);
+        this.event_handler.on('ALL_CRAWLS_FINISHED', function(){ window.clearInterval( crawler.interval ); });
 
-        crawler_painter.init();
-        this.trigger('AFTER_INIT', []);
+        this.painter.init();
+        this.event_handler.trigger('AFTER_INIT', [this]);
     }
 };

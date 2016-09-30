@@ -29,7 +29,7 @@ const crawler_painter = {
         container.append([header, table_cont]);
 
         toggle_button.click(function(){
-            crawler.trigger('TOGGLED', [name]);
+            crawler.event_handler.trigger('TOGGLED', [name]);
             var $this   = $(this),
                 css     = ($this.hasClass('glyphicon-arrow-down')) ? 'glyphicon-arrow-up' : 'glyphicon-arrow-down';
             $this.parents('.infobox').find('.tableCont').slideToggle();
@@ -38,7 +38,7 @@ const crawler_painter = {
         });
 
         export_button.click(function(){
-            crawler.trigger('BEFORE_EXPORT', [name]);
+            crawler.event_handler.trigger('BEFORE_EXPORT', [name]);
             var $this       = $(this),
                 rows        = $this.parents( '.infobox' ).first().find( 'table tr' ),
                 csvContent  = "data:text/csv;charset=utf-8,";
@@ -53,7 +53,7 @@ const crawler_painter = {
             link.setAttribute( 'href', encodeURI( csvContent ) );
             link.setAttribute( 'download', name + '.csv' );
             link.click();
-            crawler.trigger('AFTER_EXPORT', [name]);
+            crawler.event_handler.trigger('AFTER_EXPORT', [name]);
         });
 
         this.containers.push({'name': name, 'container': container});
@@ -93,23 +93,11 @@ const crawler_painter = {
      */
     set_type_by_data: function(name){
         var cont = this.get_container_by_name(name);
-        if( cont.find('td div.alert-danger').length > 0 ) crawler_painter.set_type(name, 'error');
-        else if( cont.find('td div.alert-warning').length > 0 ) crawler_painter.set_type(name, 'warning');
-        else if( cont.find('td div.alert-info').length > 0 ) crawler_painter.set_type(name, 'info');
-        else if( cont.find('td div.alert-success').length > 0 ) crawler_painter.set_type(name, 'success');
+        if( cont.find('td div.alert-danger').length > 0 ) this.set_type(name, 'error');
+        else if( cont.find('td div.alert-warning').length > 0 ) this.set_type(name, 'warning');
+        else if( cont.find('td div.alert-info').length > 0 ) this.set_type(name, 'info');
+        else if( cont.find('td div.alert-success').length > 0 ) this.set_type(name, 'success');
         return undefined;
-    },
-
-    /**
-     * Add a row that only has a status
-     *
-     * @param {string} cont
-     * @param {string} type
-     * @param {string} string
-     * @return undefined
-     */
-    add_status_row: function(cont, type, string){
-        return crawler_painter.add_row(cont, [ this.create_status(type, string) ]);
     },
 
     /**
@@ -209,6 +197,6 @@ const crawler_painter = {
      */
     init:function(){
         for(var c in this.containers) $('#results_container').append(this.containers[c]['container']);
-        crawler.on('CRAWL_FINISHED', this.update_header);
+        crawler.event_handler.on('CRAWL_FINISHED', this.update_header);
     }
 };

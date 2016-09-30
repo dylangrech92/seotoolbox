@@ -2,7 +2,7 @@ const default_tests = {
 
     // [name, title, headers, type]
     tests: [
-        ['error_pages', 'ERROR PAGES', ['URL', 'Linked From'], ''],
+        ['bad_links', 'BAD LINKS', ['URL', 'Linked From'], ''],
         ['h1_info', 'H1 INFO', ['URL', 'Count', 'Text', 'Status']],
         ['h2_info', 'H2 INFO', ['URL', 'Count', 'Text', 'Status']],
         ['word_count', 'WORD COUNT', ['URL', 'Word Count', 'Article Word Count'], 'info'],
@@ -18,7 +18,8 @@ const default_tests = {
         ['urls_test', 'URL STRUCTURE', ['URL', 'Status'], 'success'],
         ['duplicate_meta_tags', 'DUPLICATE META TAGS', ['URL', 'Status']],
         ['href_langs', 'LANG TAGS', ['URL', 'Tags'], 'info'],
-        ['orphan_pages', 'ORPHAN PAGES', ['URL']]
+        ['orphan_pages', 'ORPHAN PAGES', ['URL']],
+        ['redirect_links', 'REDIRECT LINKS', ['Link', 'In', 'Redirects To']],
     ],
 
     /**
@@ -30,17 +31,17 @@ const default_tests = {
      */
     h1_info: function(url, html){
         var h1      = html.find( 'h1' ),
-            link    = crawler_painter.create_link(url, url),
+            link    = crawler.painter.create_link(url, url),
             joined  = [],
             status;
 
         h1.each(function(){ joined.push(this.innerHTML); });
 
         if(h1.length != 1)
-            status = crawler_painter.create_status('error', (h1.length < 1) ? 'Missing H1' : 'Multiple H1 tags');
-        else status = crawler_painter.create_status('success', 'OK!');
+            status = crawler.painter.create_status('error', (h1.length < 1) ? 'Missing H1' : 'Multiple H1 tags');
+        else status = crawler.painter.create_status('success', 'OK!');
 
-        return crawler_painter.add_row(this.name, [link, h1.length, joined.join(', '), status]);
+        return crawler.painter.add_row(this.name, [link, h1.length, joined.join(', '), status]);
     },
 
     /**
@@ -52,15 +53,15 @@ const default_tests = {
      */
     h2_info: function(url, html){
         var h2      = html.find( 'h2' ),
-            link    = crawler_painter.create_link(url, url),
+            link    = crawler.painter.create_link(url, url),
             joined  = [], status;
 
         h2.each(function(){ joined.push(this.innerHTML); });
 
-        if(h2.length < 1) status = crawler_painter.create_status('warning', 'Missing H2');
-        else status = crawler_painter.create_status('success', 'OK!');
+        if(h2.length < 1) status = crawler.painter.create_status('warning', 'Missing H2');
+        else status = crawler.painter.create_status('success', 'OK!');
 
-        return crawler_painter.add_row(this.name, [link, h2.length, joined.join(', '), status]);
+        return crawler.painter.add_row(this.name, [link, h2.length, joined.join(', '), status]);
     },
 
     /**
@@ -74,11 +75,11 @@ const default_tests = {
      * @returns {undefined}
      */
     word_count: function(url, html, headers, field_data, phrases){
-        var link        = crawler_painter.create_link(url, url),
+        var link        = crawler.painter.create_link(url, url),
             word_count  = crawler.get_word_count(phrases),
             art_count   = crawler.get_word_count(field_data[3]);
 
-        return crawler_painter.add_row(this.name, [link, word_count, art_count]);
+        return crawler.painter.add_row(this.name, [link, word_count, art_count]);
     },
 
     /**
@@ -92,7 +93,7 @@ const default_tests = {
      * @returns {undefined}
      */
     int_link_info: function(url, html, headers, field_data, phrases){
-        var link = crawler_painter.create_link(url, url),
+        var link = crawler.painter.create_link(url, url),
             art_links = [], links = [];
 
         // Article links
@@ -115,13 +116,13 @@ const default_tests = {
             word_count      = crawler.get_word_count(phrases),
             density         = (links.length > 0) ? word_count / links.length : false,
             dens_text       = (density != false) ? density.toFixed(2) +' words/link' : 'No internal links',
-            status          = crawler_painter.create_status('success', 'OK!');
+            status          = crawler.painter.create_status('success', 'OK!');
 
         if( ( art_density !== false && art_density < 100 ) )
-            status = crawler_painter.create_status('warning', 'This page might be considered spammy');
+            status = crawler.painter.create_status('warning', 'This page might be considered spammy');
 
         if(links.length > 0)
-            crawler_painter.add_row( this.name, [
+            crawler.painter.add_row( this.name, [
                 link, art_links.join('<br />'), art_links.length, art_dens_text, links.length, dens_text, status
             ]);
 
@@ -138,7 +139,7 @@ const default_tests = {
      * @returns {undefined}
      */
     ext_link_info: function(url, html, headers, field_data){
-        var link = crawler_painter.create_link(url, url),
+        var link = crawler.painter.create_link(url, url),
             links = [];
 
         for( var field in field_data[2] ) {
@@ -150,7 +151,7 @@ const default_tests = {
                         ? 'warning' : 'info';
                     links.push(
                         $('<div class="clearfix"></div>').append([
-                            crawler_painter.create_status(type, href),
+                            crawler.painter.create_status(type, href),
                             '<p>&nbsp;</p>'
                         ])
                     );
@@ -159,7 +160,7 @@ const default_tests = {
         }
 
         if(links.length > 0){
-            crawler_painter.add_row(this.name, [link, links.length, links]);
+            crawler.painter.add_row(this.name, [link, links.length, links]);
         }
 
         return undefined;
@@ -175,7 +176,7 @@ const default_tests = {
      * @returns {undefined}
      */
     img_info: function(url, html, headers, field_data) {
-        var link = crawler_painter.create_link(url, url),
+        var link = crawler.painter.create_link(url, url),
             imgs = html.find('img'),
             alt = 0, title = 0, fields = [], status = '';
 
@@ -191,18 +192,18 @@ const default_tests = {
 
         // Construct Result
         if (alt > 0)
-            status = crawler_painter.create_status('error',
+            status = crawler.painter.create_status('error',
                 (alt > 1) ? alt + ' images missing alt tag' : '1 image missing alt tag');
         else if(fields.length > 0)
-            status = crawler_painter.create_status('warning',
+            status = crawler.painter.create_status('warning',
                 (fields.length > 1) ? fields.join(' and ') + ' are missing images' : fields[0] + ' is missing images');
         else if(title > 0)
-            status = crawler_painter.create_status('info',
+            status = crawler.painter.create_status('info',
                 (title > 1) ? title + ' images missing title tag' : '1 image is missing title tag');
         else
-            status = crawler_painter.create_status('success', 'OK!');
+            status = crawler.painter.create_status('success', 'OK!');
 
-        return crawler_painter.add_row(this.name, [link, imgs.length, alt, title, fields.join(', '), status]);
+        return crawler.painter.add_row(this.name, [link, imgs.length, alt, title, fields.join(', '), status]);
     },
 
     /**
@@ -214,7 +215,7 @@ const default_tests = {
      */
     title_info: function(url, html){
         var title   = html.filter( 'title' ),
-            link    = crawler_painter.create_link(url, url),
+            link    = crawler.painter.create_link(url, url),
             text    = (title.length == 1) ? title.html() : '',
             status  = default_tests.get_meta_tags_status(title, 'meta title', text, 40, 56);
 
@@ -222,7 +223,7 @@ const default_tests = {
             crawler.set_property('meta_titles', text, url);
         }
 
-        return crawler_painter.add_row(this.name, [link, text, text.length, status]);
+        return crawler.painter.add_row(this.name, [link, text, text.length, status]);
     },
 
     /**
@@ -234,7 +235,7 @@ const default_tests = {
      */
     description_info: function(url, html){
         var desc    = html.filter( 'meta[name=description]' ),
-            link    = crawler_painter.create_link(url, url),
+            link    = crawler.painter.create_link(url, url),
             text    = (desc.length == 1) ? desc.attr('content') : '',
             status  = default_tests.get_meta_tags_status(desc, 'meta description', text, 70, 156);
 
@@ -242,7 +243,7 @@ const default_tests = {
             crawler.set_property('descriptions', text, url);
         }
 
-        return crawler_painter.add_row(this.name, [link, text, text.length, status]);
+        return crawler.painter.add_row(this.name, [link, text, text.length, status]);
     },
 
     /**
@@ -256,8 +257,8 @@ const default_tests = {
         var tags = default_tests.get_tags(html, 'link', 'rel', 'canonical');
 
         if(tags.length != 1) {
-            var status = crawler_painter.create_status('error', 'Missing / Multiple canonicals found');
-            crawler_painter.add_row(this.name, [crawler_painter.create_link(url, url), status]);
+            var status = crawler.painter.create_status('error', 'Missing / Multiple canonicals found');
+            crawler.painter.add_row(this.name, [crawler.painter.create_link(url, url), status]);
         }else{
             crawler.set_property('canonicals', tags[0].attr('href'), url);
         }
@@ -274,8 +275,8 @@ const default_tests = {
      */
     noindex_pages: function(url, html) {
         if(default_tests.get_tags(html, 'meta', 'content', 'noindex').length > 0){
-            crawler_painter.add_row(this.name, [crawler_painter.create_link(url, url)]);
-            crawler_painter.set_type(this.name, 'error');
+            crawler.painter.add_row(this.name, [crawler.painter.create_link(url, url)]);
+            crawler.painter.set_type(this.name, 'error');
         }
 
         return undefined;
@@ -288,7 +289,7 @@ const default_tests = {
      * @returns {undefined}
      */
     urls_test: function(url){
-        var link = crawler_painter.create_link(url, url),
+        var link = crawler.painter.create_link(url, url),
             msg;
 
         if( url.length > 115 )                  msg = 'URL is too long';
@@ -296,7 +297,7 @@ const default_tests = {
         else if( url.replace('_','') !== url )  msg = 'URL contains under scores';
         else return undefined;
 
-        return crawler_painter.add_row(this.name, [link, crawler_painter.create_status('warning', msg)]);
+        return crawler.painter.add_row(this.name, [link, crawler.painter.create_status('warning', msg)]);
     },
 
     /**
@@ -307,7 +308,7 @@ const default_tests = {
      * @returns {undefined}
      */
     href_langs: function(url, html){
-        var link    = crawler_painter.create_link(url, url),
+        var link    = crawler.painter.create_link(url, url),
             tags    = [];
 
         $.each( html.filter( 'link' ), function(){
@@ -315,7 +316,7 @@ const default_tests = {
                 tags.push( $('<p>').text( $(this).clone().wrap('<p>').parent().html() ).html() );
         });
 
-        if( tags.length > 0 ) crawler_painter.add_row(this.name, [link, tags.join('<br />')] );
+        if( tags.length > 0 ) crawler.painter.add_row(this.name, [link, tags.join('<br />')] );
 
         return undefined;
     },
@@ -357,7 +358,7 @@ const default_tests = {
 
     /**
      * Gets the status box for the meta tag being tested
-     * Append to the crawler_painter
+     * Append to the crawler.painter
      *
      * @param {Array} tags
      * @param {string} tag_name
@@ -368,36 +369,56 @@ const default_tests = {
      */
     get_meta_tags_status: function(tags, tag_name, text, min_char, max_char){
         if( tags.length > 1 ){
-            return crawler_painter.create_status('error', 'Multiple '+tag_name+' tags');
+            return crawler.painter.create_status('error', 'Multiple '+tag_name+' tags');
         }else if( tags.length < 1 ){
-            return crawler_painter.create_status('error', 'Missing '+tag_name+' tag');
+            return crawler.painter.create_status('error', 'Missing '+tag_name+' tag');
         }else{
             var len = text.length;
             if(len < min_char){
-                return crawler_painter.create_status('warning', tag_name+' is too short');
+                return crawler.painter.create_status('warning', tag_name+' is too short');
             }else if(len > max_char){
-                return crawler_painter.create_status('warning', tag_name+' is too long');
+                return crawler.painter.create_status('warning', tag_name+' is too long');
             }else{
-                return crawler_painter.create_status('success', 'OK!');
+                return crawler.painter.create_status('success', 'OK!');
             }
+        }
+    },
+
+    /**
+     * Return a string of links if there is a list of linked_from for the given url
+     * else return false
+     *
+     * @param {string} url
+     * @returns {string|boolean}
+     */
+    get_linked_from_links: function(url){
+        if( crawler.linked_from.hasOwnProperty( url ) ) {
+            var linked_from = [];
+            for (var lf in crawler.linked_from[url]) {
+                var link = crawler.painter.create_link(crawler.linked_from[url][lf], crawler.linked_from[url][lf]);
+                linked_from.push(link);
+            }
+            return linked_from.join('<br />');
+        }else{
+            return false;
         }
     }
 }
 
 // Register the tests
-crawler.on('BEFORE_INIT', function(){
+crawler.event_handler.on('BEFORE_INIT', function(){
     for( var t in default_tests.tests ){
         var test = default_tests.tests[t],
             func = default_tests.hasOwnProperty( test[0] ) ? default_tests[test[0]] : false;
 
         crawler.regiser_test(test[0], test[1], test[2], func);
-        crawler_painter.set_type(test[0], test[3] || 'default');
+        crawler.painter.set_type(test[0], test[3] || 'default');
     }
 });
 
 // When crawler is done check for orphan pages
-crawler.on('ALL_CRAWLS_FINISHED', function(){
-    crawler_painter.set_type('orphan_pages', 'success');
+crawler.event_handler.on('ALL_CRAWLS_FINISHED', function(){
+    crawler.painter.set_type('orphan_pages', 'success');
     pages_loop:
         for( var i in crawler.tested ){
             var url = crawler.tested[i];
@@ -411,16 +432,16 @@ crawler.on('ALL_CRAWLS_FINISHED', function(){
                     if (crawler.linked_from[url][x] != url) continue pages_loop;
             }
 
-            crawler.add_row('orphan_pages', [crawler_painter.create_link(crawler.tested[i], crawler.tested[i])]);
-            crawler_painter.set_type('orphan_pages', 'error');
+            crawler.painter.add_row('orphan_pages', [crawler.painter.create_link(crawler.tested[i], crawler.tested[i])]);
+            crawler.painter.set_type('orphan_pages', 'error');
         }
 
     return true;
 });
 
-// When crawler is done check for orphan pages
-crawler.on('ALL_CRAWLS_FINISHED', function(){
-    crawler_painter.set_type('duplicate_meta_tags', 'success');
+// When crawler is done check for duplicate meta tags
+crawler.event_handler.on('ALL_CRAWLS_FINISHED', function(){
+    crawler.painter.set_type('duplicate_meta_tags', 'success');
 
     var canonicals = crawler.canonicals,
         tests      = {
@@ -435,8 +456,8 @@ crawler.on('ALL_CRAWLS_FINISHED', function(){
             var canonical = default_tests.get_key_from_object(canonicals, urls[0]);
             for( var i in urls )
                 if( canonical != default_tests.get_key_from_object(canonicals, urls[i]) ) {
-                    var status = crawler_painter.create_status('error', tests[test]);
-                    crawler_painter.add_row('duplicate_meta_tags', [urls.join(', '), status]);
+                    var status = crawler.painter.create_status('error', tests[test]);
+                    crawler.painter.add_row('duplicate_meta_tags', [urls.join(', '), status]);
                     break;
                 }
         }
@@ -445,22 +466,28 @@ crawler.on('ALL_CRAWLS_FINISHED', function(){
     return undefined;
 });
 
-// When crawler is done check for orphan pages
-crawler.on('ALL_CRAWLS_FINISHED', function(){
-    crawler_painter.set_type('error_pages', 'success');
+// When crawler is done check for bad links
+crawler.event_handler.on('ALL_CRAWLS_FINISHED', function(){
+    crawler.painter.set_type('bad_links', 'success');
     for(var f in crawler.failed){
-        var failed = crawler.failed[f];
-        if( crawler.linked_from.hasOwnProperty( failed ) ){
-            var linked_from = [];
-            for( var lf in crawler.linked_from[failed] ){
-                var link = crawler_painter.create_link(crawler.linked_from[failed][lf], crawler.linked_from[failed][lf]);
-                linked_from.push(link);
-            }
-
-            crawler_painter.add_row('error_pages', [failed, linked_from.join('<br />')]);
-            crawler_painter.set_type('error_pages', 'error');
+        var links = default_tests.get_linked_from_links(crawler.failed[f]);
+        if( links != false ){
+            crawler.painter.add_row('bad_links', [crawler.failed[f], links]);
+            crawler.painter.set_type('bad_links', 'error');
         }
     }
+    return undefined;
+});
 
+// When crawler is done check for redirect links
+crawler.event_handler.on('ALL_CRAWLS_FINISHED', function(){
+    crawler.painter.set_type('redirect_links', 'success');
+    for(var r in crawler.redirects){
+        var links = default_tests.get_linked_from_links(r);
+        if( links != false ){
+            crawler.painter.add_row('redirect_links', [r, links, crawler.redirects[r]]);
+            crawler.painter.set_type('redirect_links', 'warning');
+        }
+    }
     return undefined;
 });
