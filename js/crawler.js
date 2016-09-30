@@ -303,7 +303,7 @@ const crawler = {
      * Strip out src=<anything> so that we avoid loading the images
      * on the pages
      *
-     * @param {string}html
+     * @param {string} html
      * @returns {string}
      */
     strip_img_src: function(html){
