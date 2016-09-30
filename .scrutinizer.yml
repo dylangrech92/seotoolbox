@@ -5,6 +5,7 @@ filter:
     excluded_paths:
         - '*.min.js'
         - "third-party/"
+        - "js/default_tests.js"
 coding_style:
     php:
         spaces:
