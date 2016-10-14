@@ -36,6 +36,7 @@ page that is crawled.
 #### Colours
 When running the tests you will notice that the headers of the tests start changing colour and this
 is because the header colour reflects the most important message in that list.
+
 ![Crawler Color Legen](https://raw.githubusercontent.com/dylangrech92/seotoolbox/master/images/seotoolbox_crawler_legend.png)
 
 #### Exporting the results
@@ -47,6 +48,39 @@ in the headers of the tests.
 
 
 ## Developer Guide
+
+### Configs
+
+#### Alternate Domain
+If you're running your admin under a different domain then your front-end. It's best to setup
+the alternate domain so that the crawler can make calls directly to the front-end domain for
+pages and resources.
+
+**Note: The front-end domain is the alternate domain. As the main domain for the crawler is the 
+admin domain**
+```php
+Config::inst()->update('SEOTestSiteTreeController', 'alternate_domain', '<front-end-domain>');
+```
+
+#### User-Agents
+If you would like to change the default desktop / mobile user-agent simply update them through their
+config like so:
+```yaml
+SEOTestSiteTreeController:
+  desktop_user_agent: '<desktop agent>'
+  mobile_user_agent:  '<mobile agent>'
+```
+
+#### Ignore URLs
+Sometimes you might want to skip some urls from being crawled. To do so simply specify a set
+of regex rules like so:
+```yaml
+SEOTestSiteTreeController:
+  ignore_paths:
+    - '$dev\/' # This will ignore anything that starts with dev/
+    - '[?|&]stage=Stage' # This will ignore any staging urls
+    - 'myCustomVar=1^ # This will ignore any url that ends with "myCustomVar=1"
+```
 
 ### Tests
 
