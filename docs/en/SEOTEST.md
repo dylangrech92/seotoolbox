@@ -79,7 +79,7 @@ SEOTestSiteTreeController:
   ignore_paths:
     - '$dev\/' # This will ignore anything that starts with dev/
     - '[?|&]stage=Stage' # This will ignore any staging urls
-    - 'myCustomVar=1^ # This will ignore any url that ends with "myCustomVar=1"
+    - 'myCustomVar=1^' # This will ignore any url that ends with "myCustomVar=1"
 ```
 
 ### Tests
