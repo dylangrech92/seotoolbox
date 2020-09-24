@@ -1,3 +1,7 @@
+DEPRECATED
+====
+I no longer have time to maintain this project, or to upgrade it for Silverstripe version 4 or higher. If anyone would like to try to fork it and upgrade it, feel free to do so.
+
 SEO Toolbox
 =================
 
@@ -93,10 +97,6 @@ try to closely replicate the issue.
 - Silverstripe version
 - A simplistic overview of your setup example: Apache 2.4, admin and front-end are on seperate domains
 - Module name that might be conflicting with this one
- 
-## Contributing
-All contributions are welcome however before starting any work please do drop me a message on **dylangrech92@gmail.com** 
-so that we can coordinate what will be done and making sure all guidelines are followed so to avoid duplicate work.
  
 
 
