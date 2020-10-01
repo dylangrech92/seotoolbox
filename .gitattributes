@@ -3,3 +3,4 @@
 /.gitignore export-ignore
 /.travis.yml export-ignore
 /images export-ignore
+/videoes export-ignore
